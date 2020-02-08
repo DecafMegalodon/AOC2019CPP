@@ -4,15 +4,19 @@
 #define DEBUG 0
 int MEMSIZE = 700;
 int MAXOPCODEPARAMS = 4;
-int OPCODEPARAMS [5] = {-1,3,3,1,1};
+int OPCODEPARAMS [] = {-1,3,3,1,1,2,2,3,3};
 //int memory[MEMSIZE];
-//[NONE,add,multiple,store,print]
+//[NONE,add,multiple,store,print, jumpiftrue, jumpiffalse, lessthan, equal]
 
 //OpCode names
 const int ADD = 1;
 const int MUL = 2;
 const int PRMPT = 3;
 const int PRNT = 4;
+const int JIT = 5;
+const int JIF = 6;
+const int LT = 7;
+const int EQ = 8;
 const int EXIT = 99;
 
 //Address modes
@@ -149,6 +153,7 @@ void intCodeInterpreter(int* memory)
 	while(true)
 	{
 		readOpCode(memory, opcode, pc);
+		pc += OPCODEPARAMS[opcode->operation] + 1;
 		switch(opcode->operation)
 		{
 			case ADD: //Add two numbers together and store them. [addend, addend, store]
@@ -172,11 +177,18 @@ void intCodeInterpreter(int* memory)
 			case PRNT: //Print a number from the system
 				cout << readMem(memory, opcode->parameters[0], opcode->paramModes[0]) << "\n";
 				break;
+			case JIT: //Jump if true. If param 1 != 0, set PC to second. Otherwise NOOP
+				break;
+			case JIF: //Jump if true. If param 1 == 0, set PC to second. Otherwise NOOP
+				break;
+			case LT:
+				break;
+			case EQ:
+				break;
 			default:
 				cout << "INVALID OPCODE ERROR: " << opcode->operation << "\n";
 				exit(-1);
 		}
-		pc += OPCODEPARAMS[opcode->operation] + 1;
 	}
 }
 
