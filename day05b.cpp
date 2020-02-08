@@ -178,12 +178,26 @@ void intCodeInterpreter(int* memory)
 				cout << readMem(memory, opcode->parameters[0], opcode->paramModes[0]) << "\n";
 				break;
 			case JIT: //Jump if true. If param 1 != 0, set PC to second. Otherwise NOOP
+				if(readMem(memory, opcode->parameters[0], opcode->paramModes[0]) != 0)
+					pc = readMem(memory, opcode->parameters[1], opcode->paramModes[1]);
 				break;
 			case JIF: //Jump if true. If param 1 == 0, set PC to second. Otherwise NOOP
+				if(readMem(memory, opcode->parameters[0], opcode->paramModes[0]) == 0)
+					pc = readMem(memory, opcode->parameters[1], opcode->paramModes[1]);
 				break;
-			case LT:
+			case LT: //If param 1 < param 2, store 1 in param 3
+				if(readMem(memory, opcode->parameters[0], opcode->paramModes[0]) <
+						readMem(memory, opcode->parameters[1], opcode->paramModes[1]))
+					writeMem(memory, 1, opcode->parameters[2], opcode->paramModes[2]);
+				else
+					writeMem(memory, 0, opcode->parameters[2], opcode->paramModes[2]);
 				break;
-			case EQ:
+			case EQ: //If param 1 == param 2, store 1 in param 3
+				if(readMem(memory, opcode->parameters[0], opcode->paramModes[0]) ==
+						readMem(memory, opcode->parameters[1], opcode->paramModes[1]))
+					writeMem(memory, 1, opcode->parameters[2], opcode->paramModes[2]);
+				else
+					writeMem(memory, 0, opcode->parameters[2], opcode->paramModes[2]);
 				break;
 			default:
 				cout << "INVALID OPCODE ERROR: " << opcode->operation << "\n";
