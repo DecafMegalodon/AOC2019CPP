@@ -2,21 +2,24 @@
 #include <string>
 #include <cmath>
 #define DEBUG 0
-int MEMSIZE = 117;
+int MEMSIZE = 700;
 int MAXOPCODEPARAMS = 4;
-int OPCODEPARAMS [5] = {-1,3,3,2,2};
+int OPCODEPARAMS [5] = {-1,3,3,1,1};
+//int memory[MEMSIZE];
 //[NONE,add,multiple,store,print]
 
 //OpCode names
 const int ADD = 1;
 const int MUL = 2;
-const int STOR = 3;
+const int PRMPT = 3;
 const int PRNT = 4;
 const int EXIT = 99;
 
 //Address modes
 const int POSITION = 0;
 const int IMMEDIATE = 1;
+
+
 
 using namespace std;
 
@@ -37,14 +40,25 @@ struct OpCode
 	}
 };
 
+//Read an initial memory state from stdin
 void initializeMemory(int* memory)
 {
 	int curRead;
-	for(int addr = 0; addr < MEMSIZE; addr++)
+	int addr = 0;
+	char seperator;
+	do
 	{
-		scanf("%d,",&curRead);
+		seperator='\0';
+		scanf("%d%c",&curRead, &seperator);
 		memory[addr] = curRead;
+		if(addr >= MEMSIZE)
+		{
+			cout << "Memory overflow. Please download more RAM.\n";
+			exit(-1);
+		}
+		addr++;
 	}
+	while (seperator == ',');
 }
 
 void printRAM(int* memory)
@@ -68,13 +82,14 @@ int extractDecimalDigit(int number, int digit)
 //OPCODE format: ABCDE, C, B, A, [start of next opcode].
 //               |||^^ Two digit operation
 //               ^^^   Parameter modes. May be more or less of them depending on the operation. Leftmost 0-mode (position) may be omitted in the spec
+//C B A are the parameters for the opcode and match with the corresponding mode packed with the opcode
 void readOpCode(int* memory, OpCode* opcode, int pc)
 {
 	int protoOpCode = memory[pc]; //This includes the operation but also parameter modes
 	opcode->clearParams();
 	opcode->operation = extractDecimalDigit(protoOpCode,1)*10 + extractDecimalDigit(protoOpCode,0);
 	
-	if(opcode->operation == EXIT) //99 is our stop opcode
+	if(opcode->operation == EXIT) //EXIT is our halt opcode
 		exit(0);
 	
 	for(int opcodeParam = 0; opcodeParam < OPCODEPARAMS[opcode->operation]; opcodeParam++)
@@ -90,7 +105,13 @@ int readMem(int* memory, int param, const int mode)
 	switch(mode)
 	{
 		case POSITION:
-			return memory[param];
+			if(param < MEMSIZE)
+				return memory[param];
+			else
+			{
+				cout << "Memory overflow. Please download more RAM.\n";
+				exit(-1);
+			}
 		case IMMEDIATE:
 			return param;
 		default:
@@ -104,9 +125,17 @@ void writeMem(int* memory, const int data, const int param, const int mode)
 	switch(mode)
 	{
 		case POSITION:
-			memory[param] = data;
+			if(param < MEMSIZE)
+				memory[param] = data;
+			else
+			{
+				cout << "Memory overflow. Please download more RAM.\n";
+				exit(-1);
+			}
+			break;
 		case IMMEDIATE:
 			cout << "NONSENSICAL MEMORY MODE: " << mode << "\n";
+			exit(-1);
 		default:
 			cout << "INVALID MEMORY MODE: " << mode << "\n";
 			exit(-1);
@@ -122,28 +151,38 @@ void intCodeInterpreter(int* memory)
 		readOpCode(memory, opcode, pc);
 		switch(opcode->operation)
 		{
-			case ADD:
-				//memory[targetAddr] = memory[sourceAddr1] + memory[sourceAddr2];
+			case ADD: //Add two numbers together and store them. [addend, addend, store]
+				writeMem(memory, readMem(memory, opcode->parameters[0], opcode->paramModes[0])+
+							    readMem(memory, opcode->parameters[1], opcode->paramModes[1]),
+								opcode->parameters[2],
+								opcode->paramModes[2]);
 				break;
-			case MUL:
-				//memory[targetAddr] = memory[sourceAddr1] * memory[sourceAddr2];
+			case MUL: //Multiply two numbers together and store them
+				writeMem(memory, readMem(memory, opcode->parameters[0], opcode->paramModes[0])*
+							    readMem(memory, opcode->parameters[1], opcode->paramModes[1]),
+								opcode->parameters[2],
+								opcode->paramModes[2]);
 				break;
-			case STOR:
+			case PRMPT: //Prompt for an integer input. We're not going to try to catch bad input in this scenario.
+				cout << "Please enter a number\n";
+				int input;
+				scanf("%d",&input);
+				writeMem(memory, input, opcode->parameters[0], opcode->paramModes[0]);
 				break;
-			case PRNT:
+			case PRNT: //Print a number from the system
+				cout << readMem(memory, opcode->parameters[0], opcode->paramModes[0]) << "\n";
 				break;
 			default:
-				cout << "INVALID OPCODE ERROR\n";
+				cout << "INVALID OPCODE ERROR: " << opcode->operation << "\n";
 				exit(-1);
 		}
-		pc += 4;
+		pc += OPCODEPARAMS[opcode->operation] + 1;
 	}
 }
 
 int main()
 {
-	// int memory[MEMSIZE];
-	// initializeMemory(memory);
-	// intCodeInterpreter(memory);
-	// printf("Memory[0] = %d\n", memory[0]);
+	int memory[MEMSIZE];
+	initializeMemory(memory);
+	intCodeInterpreter(memory);
 }
