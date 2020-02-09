@@ -5,7 +5,6 @@
 int MEMSIZE = 700;
 int MAXOPCODEPARAMS = 4;
 int OPCODEPARAMS [] = {-1,3,3,1,1,2,2,3,3};
-//int memory[MEMSIZE];
 //[NONE,add,multiple,store,print, jumpiftrue, jumpiffalse, lessthan, equal]
 
 //OpCode names
