@@ -21,6 +21,8 @@ struct orbitTree
 	char* name;
 	vector<orbitTree> suborbits;
 	
+	map<char* [4],orbitTree>* potato = new map<char[4],orbitTree>;
+	
 	//Injects an object into orbit. Returns the depth of the orbit relative to the universal center of mass (COM)
 	//Returns a negative number if it can't find the parent.
 	int inject(char* parentName, char* objName)
@@ -32,8 +34,9 @@ struct orbitTree
 		}
 		else
 		{
-			return -1;
+			//Hunt through the tree and try to find the parent in the tree as a child.
 		}
+		return -1; //Womp. We couldn't find it
 	}
 	
 };
@@ -49,7 +52,7 @@ void readOrbits(vector<char*>* parents, vector<char*>* children )
 	char* child = new char[4];
 	while(scanf("%3s)%3s", parent, child) == 2)
 	{
-		printf("%s orbits %s\n", child, parent);
+		//printf("%s orbits %s\n", child, parent);
 		parents->push_back(new char[4]);
 		strncpy(parents->back(),parent,4);
 		children->push_back(new char[4]);
