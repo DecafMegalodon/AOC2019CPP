@@ -5,45 +5,47 @@ You've landed at the Universal Orbit Map facility on Mercury. Because navigation
 
 Except for the universal Center of Mass (COM), every object in space is in orbit around exactly one other object.
 
-
-
-The solution here is estimated to take between O(n^2) and O(n^3) time where n is the number of objects
+Our challenge is to find the total number of orbits, indirect or direct. F.E. COM)bbb)ccc is c orbiting b, which is itself orbiting COM
+There are a total of 3 orbits, 1 direct from bbb, and 1 direct and 1 indirect from ccc
 */
 #include <iostream>
 #include <string.h>
+#include <map>
 #include <vector>
+
 
 using namespace std;
 
-//A glorified unordered n-tree with names for planets and other orbiting bodies
-struct orbitTree
+struct orbitObject
 {
-	char* name;
-	vector<orbitTree> suborbits;
-	
-	map<char* [4],orbitTree>* potato = new map<char[4],orbitTree>;
-	
-	//Injects an object into orbit. Returns the depth of the orbit relative to the universal center of mass (COM)
-	//Returns a negative number if it can't find the parent.
-	int inject(char* parentName, char* objName)
-	{
-		if(objName == "COM") //Special case to initialize ~~the universe~~
-		{
-			name = objName;
-			return 0;
-		}
-		else
-		{
-			//Hunt through the tree and try to find the parent in the tree as a child.
-		}
-		return -1; //Womp. We couldn't find it
-	}
-	
+	int depth; //The number of steps until the COM is reached
+	char parentName[4];
 };
+typedef map<char[4], orbitObject*> orbitMap;
 
-void printOrbits(orbitTree* orbits)
+
+void printOrbits(orbitMap* orbits)
 {
 	
+}
+
+//Injects an object into orbit. Returns the depth of the orbit relative to the universal center of mass (COM)
+//Returns a zero if it can't find the parent.
+int injectIntoOrbit(const char parentName[4], const char objName[4])
+{
+	
+	// if(!strncmp(objName,"COM",4)) //Special case to initialize ~~the universe~~
+	// {
+		// strncpy(name, objName,4);
+		// depth = 1;
+		// return depth;
+	// }
+	// else
+	// {
+		// auto iterator = orbits->find(parentName);
+		// //Hunt through the tree and try to find the parent in the tree as a child.
+	// }
+	return 0; //We couldn't find it
 }
 
 void readOrbits(vector<char*>* parents, vector<char*>* children )
@@ -68,7 +70,7 @@ int main()
 	vector<char*>* unMappedParents = new vector<char*>;
 	vector<char*>* unMappedChildren = new vector<char*>;
 	readOrbits(unMappedParents, unMappedChildren);
-	orbitTree* Space = new orbitTree;
+	// orbitTree* Space = new orbitTree;
 	// cout << unMappedChildren->at(0) << "\n";
 	// cout << unMappedChildren->at(1) << "\n";
 	return 0;
