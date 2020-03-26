@@ -25,8 +25,6 @@ const int EXIT = 99;
 const int POSITION = 0;
 const int IMMEDIATE = 1;
 
-bool isOnFirstInput = true;
-
 
 
 using namespace std;
@@ -150,13 +148,15 @@ void writeMem(int* memory, const int data, const int param, const int mode)
 	}
 }
 
-void intCodeInterpreter(int* memory)
+//Our intcode computer. Immediately returns the first value returned by PRNT and halts
+int intCodeInterpreter(int* memory, int thrusterSetting, int thrusterInput)
 {
+	bool isOnFirstInput = true;
 	int pc = 0; //The program counter
 	OpCode* opcode = new OpCode();
 	while(true)
 	{
-		if (!readOpCode(memory, opcode, pc)) return;
+		if (!readOpCode(memory, opcode, pc)) return -1;
 		pc += OPCODEPARAMS[opcode->operation] + 1;
 		switch(opcode->operation)
 		{
@@ -173,13 +173,17 @@ void intCodeInterpreter(int* memory)
 								opcode->paramModes[2]);
 				break;
 			case PRMPT: //Prompt for an integer input. We're not going to try to catch bad input in this scenario.
-				cout << "Please enter a number\n";
-				int input;
-				scanf("%d",&input);
-				writeMem(memory, input, opcode->parameters[0], opcode->paramModes[0]);
+				if(isOnFirstInput)
+				{
+					writeMem(memory, thrusterSetting, opcode->parameters[0], opcode->paramModes[0]);
+					isOnFirstInput = false;
+				}
+				else
+					writeMem(memory, thrusterInput, opcode->parameters[0], opcode->paramModes[0]);
 				break;
-			case PRNT: //Print a number from the system
-				cout << readMem(memory, opcode->parameters[0], opcode->paramModes[0]) << "\n";
+				
+			case PRNT: //Returns a memory value from the system
+				return readMem(memory, opcode->parameters[0], opcode->paramModes[0]);
 				break;
 			case JIT: //Jump if true. If param 1 != 0, set PC to second. Otherwise NOOP
 				if(readMem(memory, opcode->parameters[0], opcode->paramModes[0]) != 0)
@@ -216,14 +220,19 @@ int main()
 	int* memory = new int[MEMSIZE]; //The working memory for the amps
 	initializeMemory(memoryBase);
 	int maxAmpSoFar= -1;
-	int maxAmpSettingsSoFar[NUMAMPS] = {-1,-1,-1,-1,-1};
 	int ampSettings [NUMAMPS] = {0,1,2,3,4};
+	int ampIO;
     do {
-		std::cout << ampSettings[0]<< ampSettings[1]<< ampSettings[2]<< ampSettings[3]<< ampSettings[4] << endl;
+		ampIO=0; //The input to the first amp is always zero
         for(int amp=0; amp<NUMAMPS; amp++)
 		{
 			std::memcpy(memory,memoryBase,MEMSIZE); //Reset the RAM for the AMP
-			intCodeInterpreter(memory);
-		}			
+			ampIO = intCodeInterpreter(memory, ampSettings[amp], ampIO);
+		}
+		if(maxAmpSoFar < ampIO)
+		{
+			maxAmpSoFar = ampIO;
+		}
     } while(std::next_permutation(ampSettings, ampSettings+NUMAMPS));
+	std::cout << maxAmpSoFar << endl;
 }
