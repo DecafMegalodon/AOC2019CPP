@@ -2,18 +2,23 @@
 #include <string>
 #include <cmath>
 #include <cstring>
+#include <algorithm>
 #define DEBUG 0
-int MEMSIZE = 4096;
+int MEMSIZE = 40960;
 int MAXOPCODEPARAMS = 4;
-int OPCODEPARAMS [5] = {-1,3,3,1,1};
-//int memory[MEMSIZE];
-//[NONE,add,multiple,store,print]
+int OPCODEPARAMS [] = {-1,3,3,1,1,2,2,3,3};
+const int NUMAMPS=5;
+//[NONE,add,multiple,store,print, jumpiftrue, jumpiffalse, lessthan, equal]
 
 //OpCode names
 const int ADD = 1;
 const int MUL = 2;
 const int PRMPT = 3;
 const int PRNT = 4;
+const int JIT = 5;
+const int JIF = 6;
+const int LT = 7;
+const int EQ = 8;
 const int EXIT = 99;
 
 //Address modes
@@ -150,6 +155,7 @@ void intCodeInterpreter(int* memory)
 	while(true)
 	{
 		readOpCode(memory, opcode, pc);
+		pc += OPCODEPARAMS[opcode->operation] + 1;
 		switch(opcode->operation)
 		{
 			case ADD: //Add two numbers together and store them. [addend, addend, store]
@@ -173,11 +179,32 @@ void intCodeInterpreter(int* memory)
 			case PRNT: //Print a number from the system
 				cout << readMem(memory, opcode->parameters[0], opcode->paramModes[0]) << "\n";
 				break;
+			case JIT: //Jump if true. If param 1 != 0, set PC to second. Otherwise NOOP
+				if(readMem(memory, opcode->parameters[0], opcode->paramModes[0]) != 0)
+					pc = readMem(memory, opcode->parameters[1], opcode->paramModes[1]);
+				break;
+			case JIF: //Jump if true. If param 1 == 0, set PC to second. Otherwise NOOP
+				if(readMem(memory, opcode->parameters[0], opcode->paramModes[0]) == 0)
+					pc = readMem(memory, opcode->parameters[1], opcode->paramModes[1]);
+				break;
+			case LT: //If param 1 < param 2, store 1 in param 3
+				if(readMem(memory, opcode->parameters[0], opcode->paramModes[0]) <
+						readMem(memory, opcode->parameters[1], opcode->paramModes[1]))
+					writeMem(memory, 1, opcode->parameters[2], opcode->paramModes[2]);
+				else
+					writeMem(memory, 0, opcode->parameters[2], opcode->paramModes[2]);
+				break;
+			case EQ: //If param 1 == param 2, store 1 in param 3
+				if(readMem(memory, opcode->parameters[0], opcode->paramModes[0]) ==
+						readMem(memory, opcode->parameters[1], opcode->paramModes[1]))
+					writeMem(memory, 1, opcode->parameters[2], opcode->paramModes[2]);
+				else
+					writeMem(memory, 0, opcode->parameters[2], opcode->paramModes[2]);
+				break;
 			default:
 				cout << "INVALID OPCODE ERROR: " << opcode->operation << "\n";
 				exit(-1);
 		}
-		pc += OPCODEPARAMS[opcode->operation] + 1;
 	}
 }
 
@@ -186,6 +213,15 @@ int main()
 	int* memoryBase = new int[MEMSIZE]; //The starting memory for all the amplifiers
 	int* memory = new int[MEMSIZE];
 	initializeMemory(memoryBase);
-	std::memcpy(memory,memoryBase,MEMSIZE);
-	//intCodeInterpreter(memory);
+	int maxAmpSoFar= -1;
+	int maxAmpSettingsSoFar[NUMAMPS] = {-1,-1,-1,-1,-1};
+	int ampSettings [NUMAMPS] = {0,1,2,3,4};
+    do {
+		std::cout << ampSettings[0]<< ampSettings[1]<< ampSettings[2]<< ampSettings[3]<< ampSettings[4] << endl;
+        for(int amp=0; amp<NUMAMPS; amp++)
+		{
+			std::memcpy(memory,memoryBase,MEMSIZE); //Reset the RAM for the AMP
+			intCodeInterpreter(memory);
+		}			
+    } while(std::next_permutation(ampSettings, ampSettings+NUMAMPS));
 }
