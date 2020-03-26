@@ -25,6 +25,8 @@ const int EXIT = 99;
 const int POSITION = 0;
 const int IMMEDIATE = 1;
 
+bool isOnFirstInput = true;
+
 
 
 using namespace std;
@@ -89,21 +91,21 @@ int extractDecimalDigit(int number, int digit)
 //               |||^^ Two digit operation
 //               ^^^   Parameter modes. May be more or less of them depending on the operation. Leftmost 0-mode (position) may be omitted in the spec
 //C B A are the parameters for the opcode and match with the corresponding mode packed with the opcode
-void readOpCode(int* memory, OpCode* opcode, int pc)
+bool readOpCode(int* memory, OpCode* opcode, int pc)
 {
 	int protoOpCode = memory[pc]; //This includes the operation but also parameter modes
 	opcode->clearParams();
 	opcode->operation = extractDecimalDigit(protoOpCode,1)*10 + extractDecimalDigit(protoOpCode,0);
 	
 	if(opcode->operation == EXIT) //EXIT is our halt opcode
-		exit(0);
+		return false;
 	
 	for(int opcodeParam = 0; opcodeParam < OPCODEPARAMS[opcode->operation]; opcodeParam++)
 	{
 		opcode->paramModes[opcodeParam]=extractDecimalDigit(protoOpCode,opcodeParam+2);
 		opcode->parameters[opcodeParam]=memory[pc+opcodeParam+1];
 	}
-	
+	return true;
 }
 
 int readMem(int* memory, int param, const int mode)
@@ -154,7 +156,7 @@ void intCodeInterpreter(int* memory)
 	OpCode* opcode = new OpCode();
 	while(true)
 	{
-		readOpCode(memory, opcode, pc);
+		if (!readOpCode(memory, opcode, pc)) return;
 		pc += OPCODEPARAMS[opcode->operation] + 1;
 		switch(opcode->operation)
 		{
@@ -211,7 +213,7 @@ void intCodeInterpreter(int* memory)
 int main()
 {
 	int* memoryBase = new int[MEMSIZE]; //The starting memory for all the amplifiers
-	int* memory = new int[MEMSIZE];
+	int* memory = new int[MEMSIZE]; //The working memory for the amps
 	initializeMemory(memoryBase);
 	int maxAmpSoFar= -1;
 	int maxAmpSettingsSoFar[NUMAMPS] = {-1,-1,-1,-1,-1};
