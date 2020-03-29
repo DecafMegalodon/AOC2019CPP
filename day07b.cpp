@@ -4,11 +4,13 @@
 #include <cstring>
 #include <algorithm>
 #define DEBUG 0
-int MEMSIZE = 40960;
-int MAXOPCODEPARAMS = 4;
-int OPCODEPARAMS [] = {-1,3,3,1,1,2,2,3,3};
-const int NUMAMPS=5;
+const int MEMSIZE = 40960;
+const int MAXOPCODEPARAMS = 4;
+const int OPCODEPARAMS [] = {-1,3,3,1,1,2,2,3,3};
+
 //[NONE,add,multiple,store,print, jumpiftrue, jumpiffalse, lessthan, equal]
+
+const int NUMAMPS=5;
 
 //OpCode names
 const int ADD = 1;
@@ -214,20 +216,28 @@ int intCodeInterpreter(int* memory, int thrusterSetting, int thrusterInput)
 	}
 }
 
+void resetMemories(int* refmem, int* memory)
+{
+	for(int membank = 0; membank < NUMAMPS; membank++)
+	{
+		std::memcpy(memory+MEMSIZE*membank,refmem,MEMSIZE); //Reset the RAM for the AMP
+	}
+}
+
 int main()
 {
-	int* memoryBase = new int[MEMSIZE]; //The starting memory for all the amplifiers
-	int* memory = new int[MEMSIZE]; //The working memory for the amps
-	initializeMemory(memoryBase);
+	int* refMem = new int[MEMSIZE]; //The starting memory for all the amplifiers
+	int* memory = new int[NUMAMPS*MEMSIZE];
+	initializeMemory(refMem);
 	int maxAmpSoFar= -1;
-	int ampSettings [NUMAMPS] = {0,1,2,3,4};
+	int ampSettings [NUMAMPS] = {5,6,7,8,9};
 	int ampIO;
     do {
 		ampIO=0; //The input to the first amp is always zero
+		resetMemories(refMem, memory);
         for(int amp=0; amp<NUMAMPS; amp++)
 		{
-			std::memcpy(memory,memoryBase,MEMSIZE); //Reset the RAM for the AMP
-			ampIO = intCodeInterpreter(memory, ampSettings[amp], ampIO);
+			ampIO = intCodeInterpreter(memory+amp*MEMSIZE, ampSettings[amp], ampIO);
 		}
 		if(maxAmpSoFar < ampIO)
 		{
