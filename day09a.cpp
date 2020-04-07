@@ -9,14 +9,14 @@
 using namespace std;
 
 //Our intcode computer.
-int intCodeInterpreter(int* memory, int thrusterSetting, int thrusterInput)
+int intCodeInterpreter(int* memory)
 {
-	bool isOnFirstInput = true;
-	int pc = 0; //The program counter
+	int pc = 0;
 	OpCode* opcode = new OpCode();
 	while(true)
 	{
 		if (!readOpCode(memory, opcode, pc)) return -1;
+		printf("[%5d] %4s\n", pc, OPCODENAMES[opcode->operation]);
 		pc += OPCODEPARAMS[opcode->operation] + 1;
 		switch(opcode->operation)
 		{
@@ -33,17 +33,12 @@ int intCodeInterpreter(int* memory, int thrusterSetting, int thrusterInput)
 								opcode->paramModes[2]);
 				break;
 			case STOR: //Prompt for an integer input. We're not going to try to catch bad input in this scenario.
-				if(isOnFirstInput)
-				{
-					writeMem(memory, thrusterSetting, opcode->parameters[0], opcode->paramModes[0]);
-					isOnFirstInput = false;
-				}
-				else
-					writeMem(memory, thrusterInput, opcode->parameters[0], opcode->paramModes[0]);
-				break;
-				
+				cout << "Please enter a number\n";
+				int input;
+				scanf("%d",&input);
+				writeMem(memory, input, opcode->parameters[0], opcode->paramModes[0]);				
 			case PRNT: //Returns a memory value from the system
-				cout << readMem(memory, opcode->parameters[0], opcode->paramModes[1]);
+				cout << readMem(memory, opcode->parameters[0], opcode->paramModes[0]) << endl;
 				break;
 			case JIT: //Jump if true. If param 1 != 0, set PC to second. Otherwise NOOP
 				if(readMem(memory, opcode->parameters[0], opcode->paramModes[0]) != 0)
@@ -67,6 +62,13 @@ int intCodeInterpreter(int* memory, int thrusterSetting, int thrusterInput)
 				else
 					writeMem(memory, 0, opcode->parameters[2], opcode->paramModes[2]);
 				break;
+			case ARBO: //Adjust the relative base offset
+				writeMem(memory, 
+						readMem(memory, opcode->parameters[0], opcode->paramModes[0])+
+							memory[MEMSIZE-RBOSTORE],
+						MEMSIZE-RBOSTORE,
+						POSITION);
+				break;
 			default:
 				cout << "INVALID OPCODE ERROR: " << opcode->operation << "\n";
 				exit(-1);
@@ -78,4 +80,6 @@ int main()
 {
 	int* memory = new int[MEMSIZE]; //Out intcode computer's RAM
 	initializeMemory(memory,MEMSIZE);
+	intCodeInterpreter(memory);
+	printRAM(memory,32);
 }

@@ -56,8 +56,12 @@ bool readOpCode(int* memory, OpCode* opcode, int pc)
 	if(opcode->operation == EXIT) //EXIT is our halt opcode
 		return false;
 	
-	if(opcode -> operation == 0 || opcode->operation > 8) //Invalid opcode detected
-		return false;
+	if(opcode -> operation == 0 || opcode->operation > 10) //Invalid opcode detected
+	{
+		cout << "Invalid opcode detected: " << opcode->operation << endl;
+		return false;	
+	}
+
 	
 	for(int opcodeParam = 0; opcodeParam < OPCODEPARAMS[opcode->operation]; opcodeParam++)
 	{
@@ -85,6 +89,7 @@ int readMem(int* memory, const int param, const int mode)
 {
 	switch(mode)
 	{
+		int address;
 		case POSITION:
 			if(param < MEMSIZE)
 				return memory[param];
@@ -95,6 +100,16 @@ int readMem(int* memory, const int param, const int mode)
 			}
 		case IMMEDIATE:
 			return param;
+		case RELATIVE:
+			address = memory[MEMSIZE-RBOSTORE]+param;
+			if(address >= 0 && address < MEMSIZE)
+				return memory[address];
+			else
+			{
+				cout << "Memory overflow. Please download more RAM.\n";
+				exit(-1);
+			}
+			break;
 		default:
 			cout << "INVALID MEMORY MODE: " << mode << "\n";
 			exit(-1);
@@ -105,10 +120,12 @@ void writeMem(int* memory, const int data, const int param, const int mode)
 {
 	switch(mode)
 	{
+		int address;
 		case POSITION:
 			if(param < MEMSIZE)
 			{
 				memory[param] = data;
+				return;
 				//cout << data << "Write->" << param << endl;
 			}
 			else
@@ -116,10 +133,18 @@ void writeMem(int* memory, const int data, const int param, const int mode)
 				cout << "Memory overflow. Please download more RAM.\n";
 				exit(-1);
 			}
-			break;
 		case IMMEDIATE:
 			cout << "NONSENSICAL MEMORY MODE: " << mode << "\n";
 			exit(-1);
+		case RELATIVE:
+			address = memory[MEMSIZE-RBOSTORE]+param;
+			if(address >= 0 && address < MEMSIZE)
+				memory[address]=data;
+			else
+			{
+				cout << "Memory overflow. Please download more RAM.\n";
+				exit(-1);
+			}
 		default:
 			cout << "INVALID MEMORY MODE: " << mode << "\n";
 			exit(-1);
