@@ -21,7 +21,8 @@ struct orbitObject
 	int depth; //The number of steps until the COM is reached
 	char parentName[4];
 };
-typedef map<char[4], orbitObject*> orbitMap;
+
+typedef map<string, orbitObject*> orbitMap;
 
 
 void printOrbits(orbitMap* orbits)
@@ -31,34 +32,34 @@ void printOrbits(orbitMap* orbits)
 
 //Injects an object into orbit. Returns the depth of the orbit relative to the universal center of mass (COM)
 //Returns a zero if it can't find the parent.
-int injectIntoOrbit(const char parentName[4], const char objName[4])
+int injectIntoOrbit(orbitMap* orbitMap, const char parentName[4], const char objName[4])
 {
 	
-	// if(!strncmp(objName,"COM",4)) //Special case to initialize ~~the universe~~
-	// {
-		// strncpy(name, objName,4);
-		// depth = 1;
-		// return depth;
-	// }
-	// else
-	// {
-		// auto iterator = orbits->find(parentName);
-		// //Hunt through the tree and try to find the parent in the tree as a child.
-	// }
+	if(!strncmp(objName,"COM",4)) //Special case to initialize ~~the universe~~
+	{
+		orbitObject* orbOb = new orbitObject;
+		strncpy(orbOb->parentName, "COM",4);
+		orbitMap->emplace(objName, orbOb);
+		int depth = 1;
+		return depth;
+	}
+	else
+	{
+		//auto iterator = orbits->find(parentName);
+		//Hunt through the tree and try to find the parent in the tree as a child.
+	}
 	return 0; //We couldn't find it
 }
 
-void readOrbits(vector<char*>* parents, vector<char*>* children )
+void readOrbits(vector<string*>* parents, vector<string*>* children )
 {
-	char* parent = new char[4];
-	char* child = new char[4];
-	while(scanf("%3s)%3s", parent, child) == 2)
+	string parent = string(' ', 4);
+	string child = string(' ', 4);
+	while(scanf("%3s)%3s", &parent[0], &child[0]) == 2)
 	{
-		//printf("%s orbits %s\n", child, parent);
-		parents->push_back(new char[4]);
-		strncpy(parents->back(),parent,4);
-		children->push_back(new char[4]);
-		strncpy(children->back(),child,4);
+		parents->push_back(new string(parent));
+		children->push_back(new string(child));
+		//printf("%s is orbiting %s\n", children->back()->data(), parents->back()->data());
 	}
 	cout<<"Finished reading orbits\n";
 }
@@ -67,8 +68,8 @@ int main()
 {
 	
 	printf("Running\n");
-	vector<char*>* unMappedParents = new vector<char*>;
-	vector<char*>* unMappedChildren = new vector<char*>;
+	vector<string*>* unMappedParents = new vector<string*>;
+	vector<string*>* unMappedChildren = new vector<string*>;
 	readOrbits(unMappedParents, unMappedChildren);
 	// orbitTree* Space = new orbitTree;
 	// cout << unMappedChildren->at(0) << "\n";
