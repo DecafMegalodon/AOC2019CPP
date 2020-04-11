@@ -13,99 +13,53 @@ There are a total of 3 orbits, 1 direct from bbb, and 1 direct and 1 indirect fr
 #include <map>
 #include <vector>
 
-
 using namespace std;
 
-struct orbitObject
+struct orbitPair
 {
-	int depth; //The number of steps until the COM is reached
-	string* parentName;
+	string* parent;
+	string* child;
+	
+	orbitPair(string par, string chi)
+	{
+		parent = new string(par);
+		child = new string(chi);
+	}
 };
 
-typedef map<string*, orbitObject*> orbitMap;
-typedef pair<string*, string*> orbitPair; //first: parent, second: child
-
-
-void printOrbits(orbitMap* orbits)
+struct orbitList //LL for orbits we haven't figured out where they go in the universe yet
 {
+	orbitList* next;
+	orbitPair* data;
 	
-}
-
-//Injects an object into orbit. Returns the depth of the orbit relative to the universal center of mass (COM)
-//Returns a zero if it can't find the parent.
-int injectIntoOrbit(orbitMap* orbitMap, const string* parentName, const string* objName)
-{
-	//cout << parentName->size() << endl;
-	if(parentName->compare("COM") == 0) //Initialize ~~the universe~~
+	orbitList(orbitList* nex, orbitPair* pair)
 	{
-		int depth = 1;
-		orbitObject* orbOb = new orbitObject;
-		orbOb->parentName = new string(*parentName);
-		orbOb->depth = 1;
-		orbitMap->emplace(new string(*objName), orbOb);
-		return depth;
+		next = nex;
+		data = pair;
 	}
-	else
-	{
-		//auto iterator = orbits->find(parentName);
-		//Hunt through the tree and try to find the parent in the tree as a child.
-		// if(orbitMap.find(parent) != prbitMap.end())
-			// cout << "yay" << endl;
-		// else
-			// cout << "yeet" << endl;
-		
-	}
+};
 
-	return 0; //We couldn't find it
-}
-
-void readOrbits(vector<string*>* parents, vector<string*>* children )
+//Reads the parent-child lists from standard in, in the format of parent)child
+orbitList* readOrbits()
 {
 	string parent = string("   ");
 	string child = string("   ");
+	orbitPair* orbPair;
+	orbitList* orbList = NULL;
 	while(scanf("%3s)%3s", &parent[0], &child[0]) == 2) //Ugly hack is ugly
 	{
-		parents->push_back(new string(parent));
-		children->push_back(new string(child));
-		//printf("%s is orbiting %s\n", children->back()->data(), parents->back()->data());
+		orbPair = new orbitPair(parent, child);
+		orbList = new orbitList(orbList, orbPair);
+		cout << parent.data() << ")" << child.data() << endl;
 	}
-	cout<<"Finished reading orbits\n";
+	return orbList;
 }
 
-void dumpUniverse(orbitMap* orbitMap)
-{
-	for(auto iter=orbitMap->begin(); iter != orbitMap->end(); ++iter)
-		cout << iter->second->parentName->data() << ")" << iter->first->data() << endl;
-}
 
 int main()
 {
-	
-	printf("Running\n");
-	vector<string*>* unMappedParents = new vector<string*>;
-	vector<string*>* unMappedChildren = new vector<string*>;
-	readOrbits(unMappedParents, unMappedChildren);
-	orbitMap* space = new orbitMap;
-	
-	//vector*<string*>::iterator childrenIT;
-	//vector*<string*>::iterator parentsIT;
-	int orbitDepth;
-	auto childrenIT = *unMappedChildren->begin();
-	auto parentIT = *unMappedParents->begin();
-	
-	while(!unMappedChildren->empty())
-	{	
-
-		cout<<childrenIT->data()<<endl;
-		unMappedChildren->erase(childrenIT);
-		childrenIT = *unMappedChildren->begin();
-	}
-
-	injectIntoOrbit(space, unMappedParents->at(0),unMappedChildren->at(0));
-	injectIntoOrbit(space, unMappedParents->at(1),unMappedChildren->at(1));
-	injectIntoOrbit(space, unMappedParents->at(2),unMappedChildren->at(2));
-	//if(unMappedChildren->at(0)->compare(*unMappedParents->at(0)) == 0)
-	dumpUniverse(space);
+	//printf("Running\n");
+	readOrbits();
 	return 0;
 }
 
