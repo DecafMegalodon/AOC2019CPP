@@ -30,16 +30,20 @@ struct orbitPair
 struct orbitList //LL for orbits we haven't figured out where they go in the universe yet
 {
 	orbitList* next;
+	orbitList* last;
 	orbitPair* data;
+
 	
-	orbitList(orbitList* nex, orbitPair* pair)
+	orbitList(orbitList* nex, orbitList* las, orbitPair* pair)
 	{
 		next = nex;
+		last = las;
 		data = pair;
 	}
 };
 
-typedef map<string*, int> universe; //Name of body, steps to reach the COM
+typedef map<string*, int> Universe; //Name of body, steps to reach the COM
+
 
 //Reads the parent-child lists from standard in, in the format of parent)child
 orbitList* readOrbits()
@@ -48,10 +52,16 @@ orbitList* readOrbits()
 	string child = string("   ");
 	orbitPair* orbPair;
 	orbitList* orbList = NULL;
+	
 	while(scanf("%3s)%3s", &parent[0], &child[0]) == 2) //Ugly hack is ugly
 	{
 		orbPair = new orbitPair(parent, child);
-		orbList = new orbitList(orbList, orbPair);
+		
+		orbList = new orbitList(orbList, NULL, orbPair);
+		if(orbList->next != NULL)
+			orbList->next->last = orbList;
+		
+		
 	}
 	return orbList;
 }
@@ -69,7 +79,7 @@ void dumpOrbList(orbitList* list)
 
 //Puts a child into orbit if the parent is already present, returning the steps to COM, -1 otherwise
 //Cleans up memory objects that are no longer needed
-int injectOrbit(universe* universe, orbitPair* orbPair)
+int injectOrbit(Universe* universe, orbitPair* orbPair)
 {
 	int distance; //Distance to COM
 	if(orbPair->parent->compare("COM") == 0) //Does it directly orbit COM?
@@ -98,11 +108,17 @@ int injectOrbit(universe* universe, orbitPair* orbPair)
 
 int main()
 {
+	Universe* universe = new Universe(); //No programmer should have this much power
 	orbitList* orbList = readOrbits();
 	dumpOrbList(orbList);
+	
+	int totalDepth = 0;
+	int returnedDepth;
+	orbitList* curCel = orbList;
+	
 	// while(orbList != NULL)
 	// {
-		
+		// returnedDepth = injectOrbit(universe, 
 		
 	// }
 	
