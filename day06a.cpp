@@ -42,7 +42,14 @@ struct orbitList //LL for orbits we haven't figured out where they go in the uni
 	}
 };
 
-typedef map<string*, int> Universe; //Name of body, steps to reach the COM
+// int compareStringPointers(string* str1, string* str2)
+// {
+	// return str1->compare(*str2);
+// }
+
+auto compareStringPointers = [](const string* str1, const string* str2) {return str1->compare(*str2);};
+
+typedef map<string*, int, decltype(compareStringPointers)> Universe; //Name of body, steps to reach the COM
 
 
 //Reads the parent-child lists from standard in, in the format of parent)child
@@ -95,8 +102,8 @@ int injectOrbit(Universe* universe, orbitPair* orbPair)
 	{
 		distance = 1;
 		universe->emplace(orbPair->child, distance);
-		delete orbPair->parent;
-		delete orbPair;
+		//delete orbPair->parent;
+		//delete orbPair;
 		return distance;
 	}
 	else //Maybe the parent is present?
@@ -107,10 +114,10 @@ int injectOrbit(Universe* universe, orbitPair* orbPair)
 		cout << endl << (int) orbPair->parent->data()[3] << endl;
 		if(iter != universe->end()) //The parent exists
 		{
-			distance = iter->second;
-			universe->emplace(orbPair->child, distance+1);
-			delete orbPair->parent;
-			delete orbPair;
+			distance = iter->second + 1;
+			universe->emplace(orbPair->child, distance);
+			//delete orbPair->parent;
+			//delete orbPair;
 			return distance;
 		}
 		// else
@@ -122,14 +129,14 @@ int injectOrbit(Universe* universe, orbitPair* orbPair)
 
 int main()
 {
-	Universe* universe = new Universe(); //No programmer should have this much power
+	Universe* universe = new Universe(compareStringPointers); //No programmer should have this much power
 	orbitList* orbList = readOrbits();
 	//dumpOrbList(orbList);
 	
 	int totalDepth = 0;
 	int returnedDepth;
 	orbitList* curCel = orbList;
-	orbitList* delCel = NULL; //If we need to delete a cell
+	orbitList* delCel = NULL; //If we need to //delete a cell
 	
 	while(orbList != NULL)
 	{
@@ -148,8 +155,8 @@ int main()
 			
 			delCel = curCel;
 			curCel = curCel->next;
-			delete delCel->data; //Parent has already been deleted. We need to keep child
-			delete delCel;
+			//delete delCel->data; //Parent has already been //deleted. We need to keep child
+			//delete delCel;
 			
 			totalDepth += returnedDepth;
 			dumpOrbList(orbList);
