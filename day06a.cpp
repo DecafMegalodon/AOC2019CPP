@@ -42,12 +42,6 @@ struct orbitList //LL for orbits we haven't figured out where they go in the uni
 	}
 };
 
-auto compareStringPointers = [](const string* str1, const string* str2)
-{
-	printf("Comparing >>%s<< and >>%s<<\n", str1->data(), str2->data());
-	return str1->compare(*str2);
-};
-
 typedef unordered_map<string, int> Universe; //Name of body, steps to reach the COM
 
 
