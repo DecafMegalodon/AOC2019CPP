@@ -105,22 +105,17 @@ int injectOrbit(Universe* universe, orbitPair* orbPair)
 		//cout << "Direct COM orbit found!\n";
 		distance = 1;
 		universe->emplace(orbPair->child, distance);
-		//delete orbPair->parent;
-		//delete orbPair;
+		delete orbPair;
 		return distance;
 	}
 	else //Maybe the parent is present?
 	{
-		//cout << "Finding:>>" << orbPair->parent.data() << "<<" <<endl;
-		//cout << "I found " << universe->count(orbPair->parent) << endl;
 		auto iter = universe->find(orbPair->parent);
 		if(iter != universe->end()) //The parent exists
 		{
-			//cout << "Parent orbit found!\n";
 			distance = iter->second + 1;
 			universe->emplace(orbPair->child, distance);
-			//delete orbPair->parent;
-			//delete orbPair;
+			delete orbPair;
 			return distance;
 		}
 		return -1; //Couldn't find where to insert it. Maybe next time?
@@ -155,8 +150,7 @@ int main()
 			
 			delCel = curCel;
 			curCel = curCel->next;
-			//delete delCel->data; //Parent has already been //deleted. We need to keep child
-			//delete delCel;
+			delete delCel;
 			
 			totalDepth += returnedDepth;
 		}
@@ -167,10 +161,8 @@ int main()
 		{
 			curCel = orbList;
 		}
-		//dumpOrbList(orbList);
-		//dumpUniverse(universe);
 	}
-	cout << "Total orbits: " << totalDepth << endl;
+	cout << totalDepth << endl;
 	return 0;
 }
 
