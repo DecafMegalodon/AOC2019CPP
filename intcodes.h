@@ -32,8 +32,8 @@ const int RBOSTORE = 2; //Relative base offset
 
 struct OpCode
 {
-	int operation;
-	int* parameters = new int[MAXOPCODEPARAMS];
+	long operation;
+	long* parameters = new long[MAXOPCODEPARAMS];
 	int* paramModes = new int[MAXOPCODEPARAMS];
 	
 	void clearParams()
@@ -48,7 +48,7 @@ struct OpCode
 };
 
 //Reads an initial memory state from standard in
-void initializeMemory(int* memory, int size);
+void initializeMemory(long* memory, int size);
 
 //Extracts a single decimal digit from number, in the digit-th spot. Right to left, starting at 0
 //If there is no such decimal digit it will be treated as being padded with zeros
@@ -59,15 +59,15 @@ int extractDecimalDigit(int number, int digit);
 //               |||^^ Two digit operation
 //               ^^^   Parameter modes. May be more or less of them depending on the operation. Leftmost 0-mode (position) may be omitted in the spec
 //C B A are the parameters for the opcode and match with the corresponding mode packed with the opcode
-bool readOpCode(int* memory, OpCode* opcode, int pc);
+bool readOpCode(long* memory, OpCode* opcode, int pc);
 
 //Prints RAM in slightly more human readable chunks of integers
-void printRAM(int* memory, int size);
+void printRAM(long* memory, int size);
 
 //Reads a specified piece of memory (param) in the specified parameter mode (mode)
-int readMem(int* memory, const int param, const int mode);
+long readMem(long* memory, const int param, const int mode);
 
 //Ditto, but writing to memory instead
-void writeMem(int* memory, const int data, const int param, const int mode);
+void writeMem(long* memory, const long data, const int param, const int mode);
 
 #endif

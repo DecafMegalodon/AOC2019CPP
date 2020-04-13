@@ -18,16 +18,24 @@ void initWireboard(WireRow* wireboard)
 	}
 }
 
-// void printWireboard(WireRow* wireboard) //Probably a poor decision to run this on a full-sized wireboard
-// {
-	// for(int row=0; row<BOARDSIZE; row++)
-	// {
-		// for(int col=0; col<BOARDSIZE; col++)
-			// cout << (wireboard[row].test(col) == true ? 'X' : '.');
-		// cout << "\n";
-	// }
-	// cout << "\n";
-// }
+//Denotes that there is a wire at x,y
+void setWire(WireRow* wireboard, int x, int y)
+{
+	if(wireboard[y] == NULL)
+	{
+		wireboard[y] = new WireRow()
+	}
+}
+
+//checks if there is a wire at x,y
+void checkWire(WireRow* wireboard, int x, int y)
+{
+	if(wireboard[y] == NULL)
+		return 0;
+	else
+		return wireboard[y][x]
+	
+}
 
 void readWire(WireRow* wireboard, int wirenum)
 {
@@ -40,7 +48,6 @@ void readWire(WireRow* wireboard, int wirenum)
 	int ydiff;//These show how the wires will move for a given direction
 	int xdiff;
 	int mindistance = INT_MAX; //We'll only use this for wire 2
-	int distanceFromOrigin; //The taxicab distance from the start point where the two wires crossed. Wire 2 only.
 	while(scanf("%c%d%c",&direction, &distance, &newlineORcomma))
 	{
 		//printf("%c%d\n", direction, distance);

@@ -3,173 +3,49 @@
 #include <cmath>
 #include <cstring>
 #include <algorithm>
-#define DEBUG 0
-const int MEMSIZE = 1024;
-const int MAXOPCODEPARAMS = 4;
-const int OPCODEPARAMS [] = {-1,3,3,1,1,2,2,3,3};
-
-//[NONE,add,multiple,store,print, jumpiftrue, jumpiffalse, lessthan, equal]
+#include "intcodes.h"
+#include "disassembleRAM.h"
+#include <climits>
 
 const int NUMAMPS=5;
 
-#include "intcodes.h"
-
-
-
 using namespace std;
 
-struct OpCode
-{
-	int operation;
-	int* parameters = new int[MAXOPCODEPARAMS];
-	int* paramModes = new int[MAXOPCODEPARAMS];
-	
-	void clearParams()
-	{
-		for(int i=0; i<MAXOPCODEPARAMS; i++)
-		{
-			paramModes[i] = -1;
-			parameters[i] = -1;
-		}
-		
-	}
-};
-
-//Read an initial memory state from stdin
-void initializeMemory(int* memory)
-{
-	int curRead;
-	int addr = 0;
-	char seperator;
-	do
-	{
-		seperator='\0';
-		scanf("%d%c",&curRead, &seperator);
-		memory[addr] = curRead;
-		if(addr >= MEMSIZE)
-		{
-			cout << "Memory overflow. Please download more RAM.\n";
-			exit(-1);
-		}
-		addr++;
-	}
-	while (seperator == ',');
-}
-
-void printRAM(int* memory)
-{
-	for(int addr = 0; addr < MEMSIZE; addr+= 16)
-	{
-		printf("[%5d]", addr);
-		for(int offset = 0; offset < 16; offset++)
-		{
-			printf("%8d ", memory[addr+offset]);
-		}
-		cout << endl;
-	}
-	cout << "\n";
-}
-
-//Extracts a single decimal digit from number, in the digit-th spot. Right to left, starting at 0
-//If there is no such decimal digit it will be treated as being padded with zeros
-int extractDecimalDigit(int number, int digit)
-{
-	int trimmed = number % (int)pow(10, digit+1); //Floating point error???
-	return (int)(trimmed / pow(10, digit));
-}
-
-//Reads an opcode starting from the current program counter
-//OPCODE format: ABCDE, C, B, A, [start of next opcode].
-//               |||^^ Two digit operation
-//               ^^^   Parameter modes. May be more or less of them depending on the operation. Leftmost 0-mode (position) may be omitted in the spec
-//C B A are the parameters for the opcode and match with the corresponding mode packed with the opcode
-bool readOpCode(int* memory, OpCode* opcode, int pc)
-{
-	int protoOpCode = memory[pc]; //This includes the operation but also parameter modes
-	opcode->clearParams();
-	opcode->operation = extractDecimalDigit(protoOpCode,1)*10 + extractDecimalDigit(protoOpCode,0);
-	
-	if(opcode->operation == EXIT) //EXIT is our halt opcode
-		return false;
-	
-	for(int opcodeParam = 0; opcodeParam < OPCODEPARAMS[opcode->operation]; opcodeParam++)
-	{
-		opcode->paramModes[opcodeParam]=extractDecimalDigit(protoOpCode,opcodeParam+2);
-		opcode->parameters[opcodeParam]=memory[pc+opcodeParam+1];
-	}
-	return true;
-}
-
-int readMem(int* memory, const int param, const int mode)
-{
-	switch(mode)
-	{
-		case POSITION:
-			if(param < MEMSIZE)
-				return memory[param];
-			else
-			{
-				cout << "Memory overflow. Please download more RAM.\n";
-				exit(-1);
-			}
-		case IMMEDIATE:
-			return param;
-		default:
-			cout << "INVALID MEMORY MODE: " << mode << "\n";
-			exit(-1);
-	}
-}
-
-void writeMem(int* memory, const int data, const int param, const int mode)
-{
-	switch(mode)
-	{
-		case POSITION:
-			if(param < MEMSIZE)
-				memory[param] = data;
-			else
-			{
-				cout << "Memory overflow. Please download more RAM.\n";
-				exit(-1);
-			}
-			break;
-		case IMMEDIATE:
-			cout << "NONSENSICAL MEMORY MODE: " << mode << "\n";
-			exit(-1);
-		default:
-			cout << "INVALID MEMORY MODE: " << mode << "\n";
-			exit(-1);
-	}
-}
 
 //Our intcode computer. Immediately returns the first value returned by PRNT and halts
 int intCodeInterpreter(int* memory, int thrusterSetting, int thrusterInput)
 {
-	cout << "Booting interpreter\n";
+	//cout << "Booting interpreter\n";
 	bool isOnFirstInput = true;
-	int pc = 0; //The program counter
+	int pc = memory[MEMSIZE-1]; //The program counter. 
 	OpCode* opcode = new OpCode();
 	while(true)
 	{
 		if (!readOpCode(memory, opcode, pc))
-			return -1; //If we encounter the EXIT opcode, stop the interpreter
+			return INT_MIN; //If we encounter the EXIT opcode, stop the interpreter
+		printf("[%5d] %4s\n", pc, OPCODENAMES[opcode->operation]);
 		pc += OPCODEPARAMS[opcode->operation] + 1;
-		cout << "Opcode=" << opcode->operation << endl;
+		printRAM(memory, 320);
 		switch(opcode->operation)
 		{
 			case ADD: //Add two numbers together and store them. [addend, addend, store]
+				printf("%d + %d\n", readMem(memory, opcode->parameters[0], opcode->paramModes[0]), 
+							readMem(memory, opcode->parameters[1], opcode->paramModes[1]));
 				writeMem(memory, readMem(memory, opcode->parameters[0], opcode->paramModes[0])+
 							    readMem(memory, opcode->parameters[1], opcode->paramModes[1]),
 								opcode->parameters[2],
 								opcode->paramModes[2]);
+
 				break;
 			case MUL: //Multiply two numbers together and store them
+				printf("%d x %d\n", readMem(memory, opcode->parameters[0], opcode->paramModes[0]), 
+							readMem(memory, opcode->parameters[1], opcode->paramModes[1]));
 				writeMem(memory, readMem(memory, opcode->parameters[0], opcode->paramModes[0])*
 							    readMem(memory, opcode->parameters[1], opcode->paramModes[1]),
 								opcode->parameters[2],
 								opcode->paramModes[2]);
 				break;
-			case PRMPT: //Prompt for an integer input. We're not going to try to catch bad input in this scenario.
+			case STOR: //Prompt for an integer input. We're not going to try to catch bad input in this scenario.
 				if(isOnFirstInput)
 				{
 					writeMem(memory, thrusterSetting, opcode->parameters[0], opcode->paramModes[0]);
@@ -181,27 +57,36 @@ int intCodeInterpreter(int* memory, int thrusterSetting, int thrusterInput)
 				
 			case PRNT: //Returns a memory value from the system
 				cout<<"Returning memory addr:"<<opcode->parameters[0]<<endl;
-				//printRAM(memory);
+				memory[MEMSIZE-1]=pc; //Store our PC to resume execution if we make it back
 				return readMem(memory, opcode->parameters[0], opcode->paramModes[0]);
 				break;
 			case JIT: //Jump if true. If param 1 != 0, set PC to second. Otherwise NOOP
-				if(readMem(memory, opcode->parameters[0], opcode->paramModes[0]) != 0)
-					pc = readMem(memory, opcode->parameters[1], opcode->paramModes[1]);
+				printf("Examining %d in mode %d for jump to %d in mode %d\n", opcode->parameters[0], opcode->paramModes[0], opcode->parameters[1], opcode->paramModes[1]);
+				if(readMem(memory, opcode->parameters[1], opcode->paramModes[1]) != 0)
+				{
+					pc = readMem(memory, opcode->parameters[0], opcode->paramModes[0]);
+					cout << "Jumping to PC=" << pc << endl;
+				}
+				else
+					cout << "Not jumping\n";
 				break;
 			case JIF: //Jump if true. If param 1 == 0, set PC to second. Otherwise NOOP
 				if(readMem(memory, opcode->parameters[0], opcode->paramModes[0]) == 0)
+				{
 					pc = readMem(memory, opcode->parameters[1], opcode->paramModes[1]);
+					cout << "Jumping to PC=" << pc << endl;
+				}
 				break;
 			case LT: //If param 1 < param 2, store 1 in param 3
 				if(readMem(memory, opcode->parameters[0], opcode->paramModes[0]) <
-						readMem(memory, opcode->parameters[1], opcode->paramModes[1]))
+							readMem(memory, opcode->parameters[1], opcode->paramModes[1]))
 					writeMem(memory, 1, opcode->parameters[2], opcode->paramModes[2]);
 				else
 					writeMem(memory, 0, opcode->parameters[2], opcode->paramModes[2]);
 				break;
 			case EQ: //If param 1 == param 2, store 1 in param 3
 				if(readMem(memory, opcode->parameters[0], opcode->paramModes[0]) ==
-						readMem(memory, opcode->parameters[1], opcode->paramModes[1]))
+							readMem(memory, opcode->parameters[1], opcode->paramModes[1]))
 					writeMem(memory, 1, opcode->parameters[2], opcode->paramModes[2]);
 				else
 					writeMem(memory, 0, opcode->parameters[2], opcode->paramModes[2]);
@@ -226,7 +111,7 @@ void printSettings(int amps[5])
 	cout << "{";
 	for(int i = 0; i < 5; ++i)
 	{
-		printf("%d ", i);
+		printf("%d ", amps[i]);
 	}
 	cout << "}\n";
 }
@@ -235,7 +120,7 @@ int main()
 {
 	int* refMem = new int[MEMSIZE]; //The starting memory for all the amplifiers
 	int* memory = new int[NUMAMPS*MEMSIZE];
-	initializeMemory(refMem);
+	initializeMemory(refMem, MEMSIZE);
 	int maxAmpSoFar= -1;
 	int ampSettings [NUMAMPS] = {5,6,7,8,9};
 	int ampIO;
@@ -245,23 +130,29 @@ int main()
 		resetMemories(refMem, memory);
 		printSettings(ampSettings);
 		
-		maxAmpThisSetting = -1;
+		maxAmpThisSetting = INT_MIN;
 		do {
 			for(int amp=0; amp<NUMAMPS; amp++)
 			{
+				//disassembleRAM(memory+amp*MEMSIZE, MEMSIZE);
 				cout << "Amp no " << amp << endl;
-				//printRAM(memory+amp*MEMSIZE);
 				ampIO = intCodeInterpreter(memory+amp*MEMSIZE, ampSettings[amp], ampIO);
-				cout << ampIO << endl;
-				if(ampIO == -1)
+				cout << "ampIO = " << ampIO << endl;
+				if(ampIO == INT_MIN)
 				{
-					cout << "Done with this setting";
+					cout << "Done with this setting\n";
 					break;
 				}
 					
 			}
+			if(ampIO != INT_MIN) //If we completed all the amps
+			{
+				cout << "Yay!";
+			}
 			maxAmpThisSetting = max(maxAmpThisSetting, ampIO);
-		} while (ampIO != -1);
+			maxAmpSoFar = max(maxAmpSoFar, maxAmpThisSetting);
+			ampIO = INT_MIN;
+		} while (ampIO != INT_MIN);
 		maxAmpSoFar = max(maxAmpSoFar, maxAmpThisSetting);
     } while(std::next_permutation(ampSettings, ampSettings+NUMAMPS));
 	std::cout << maxAmpSoFar << endl;

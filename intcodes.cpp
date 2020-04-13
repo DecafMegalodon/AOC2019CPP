@@ -10,15 +10,15 @@ potentially breaking to future or past challenges if they are updated
 
 using namespace std;
 //Read an initial memory state from stdin. 
-void initializeMemory(int* memory, int size)
+void initializeMemory(long* memory, int size)
 {
-	int curRead;
+	long curRead;
 	int addr = 0;
 	char seperator;
 	do
 	{
 		seperator='\0';
-		scanf("%d%c",&curRead, &seperator);
+		scanf("%li%c",&curRead, &seperator);
 		memory[addr] = curRead;
 		if(addr >= size)
 		{
@@ -47,9 +47,9 @@ int extractDecimalDigit(int number, int digit)
 //               |||^^ Two digit operation
 //               ^^^   Parameter modes. May be more or less of them depending on the operation. Leftmost 0-mode (position) may be omitted in the spec
 //C B A are the parameters for the opcode and match with the corresponding mode packed with the opcode
-bool readOpCode(int* memory, OpCode* opcode, int pc)
+bool readOpCode(long* memory, OpCode* opcode, int pc)
 {
-	int protoOpCode = memory[pc]; //This includes the operation but also parameter modes
+	long protoOpCode = memory[pc]; //This includes the operation but also parameter modes
 	opcode->clearParams();
 	opcode->operation = extractDecimalDigit(protoOpCode,1)*10 + extractDecimalDigit(protoOpCode,0);
 	
@@ -71,21 +71,21 @@ bool readOpCode(int* memory, OpCode* opcode, int pc)
 	return true;
 }
 
-void printRAM(int* memory, int size)
+void printRAM(long* memory, int size)
 {
 	for(int addr = 0; addr < size; addr+= 8)
 	{
 		printf("[%5d]", addr);
 		for(int offset = 0; offset < 8; offset++)
 		{
-			printf("%8d ", memory[addr+offset]);
+			printf("%8li", memory[addr+offset]);
 		}
 		cout << endl;
 	}
 	cout << "\n";
 }
 
-int readMem(int* memory, const int param, const int mode)
+long readMem(long* memory, const int param, const int mode)
 {
 	switch(mode)
 	{
@@ -116,7 +116,7 @@ int readMem(int* memory, const int param, const int mode)
 	}
 }
 
-void writeMem(int* memory, const int data, const int param, const int mode)
+void writeMem(long* memory, const long data, const int param, const int mode)
 {
 	switch(mode)
 	{
