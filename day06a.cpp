@@ -77,11 +77,20 @@ void dumpOrbList(orbitList* list)
 	}
 }
 
+void dumpUniverse(Universe* univ)
+{
+	for(auto it = univ->begin(); it != univ->end(); it++)
+	{
+		printf("%s %i, %i\n", it->first->data(), it->second, it->first->compare(string("AAA")));
+	}
+}
+
 //Puts a child into orbit if the parent is already present, returning the steps to COM, -1 otherwise
 //Cleans up memory objects that are no longer needed
 int injectOrbit(Universe* universe, orbitPair* orbPair)
 {
 	int distance; //Distance to COM
+	//cout << orbPair->parent->data() << endl;
 	if(orbPair->parent->compare("COM") == 0) //Does it directly orbit COM?
 	{
 		distance = 1;
@@ -92,7 +101,10 @@ int injectOrbit(Universe* universe, orbitPair* orbPair)
 	}
 	else //Maybe the parent is present?
 	{
+		cout << "Finding:>>" << orbPair->parent->data() << "<<" <<endl;
+		cout << "I found " << universe->count(orbPair->parent) << endl;
 		auto iter = universe->find(orbPair->parent);
+		cout << endl << (int) orbPair->parent->data()[3] << endl;
 		if(iter != universe->end()) //The parent exists
 		{
 			distance = iter->second;
@@ -101,6 +113,8 @@ int injectOrbit(Universe* universe, orbitPair* orbPair)
 			delete orbPair;
 			return distance;
 		}
+		// else
+			// cout << "H*ck we couldn't find it\n";
 		return -1; //Couldn't find where to insert it. Maybe next time?
 	}
 }
@@ -110,18 +124,44 @@ int main()
 {
 	Universe* universe = new Universe(); //No programmer should have this much power
 	orbitList* orbList = readOrbits();
-	dumpOrbList(orbList);
+	//dumpOrbList(orbList);
 	
 	int totalDepth = 0;
 	int returnedDepth;
 	orbitList* curCel = orbList;
+	orbitList* delCel = NULL; //If we need to delete a cell
 	
-	// while(orbList != NULL)
-	// {
-		// returnedDepth = injectOrbit(universe, 
+	while(orbList != NULL)
+	{
+		returnedDepth = injectOrbit(universe, curCel->data);
+		if(returnedDepth != -1) //We found the parent (or COM) in the universe!
+		{
+			if(curCel->last == NULL) //Are we looking at the first cell?
+				orbList = curCel->next;
+			else
+				curCel->last->next = curCel->next;
+			
+			
+			if(curCel->next != NULL) //Looking at the last cell?
+				curCel->next->last = curCel->last;
+			
+			
+			delCel = curCel;
+			curCel = curCel->next;
+			delete delCel->data; //Parent has already been deleted. We need to keep child
+			delete delCel;
+			
+			totalDepth += returnedDepth;
+			dumpOrbList(orbList);
+		}
+		else
+			curCel = curCel->next;
 		
-	// }
-	
+		if(curCel == NULL)
+			curCel = orbList;
+		dumpUniverse(universe);
+	}
+	cout << "Total orbits: " << totalDepth << endl;
 	return 0;
 }
 
