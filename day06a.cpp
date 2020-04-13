@@ -77,6 +77,7 @@ orbitList* readOrbits()
 void dumpOrbList(orbitList* list)
 {
 	orbitList* curCel = list;
+	cout << "These pairs still need a home:\n";
 	while(curCel != NULL)
 	{
 		printf("%s)%s\n", curCel->data->parent->data(), curCel->data->child->data());
@@ -86,9 +87,10 @@ void dumpOrbList(orbitList* list)
 
 void dumpUniverse(Universe* univ)
 {
+	cout << "The universe so far... (Body name, Steps to COM)\n";
 	for(auto it = univ->begin(); it != univ->end(); it++)
 	{
-		printf("%s %i, %i\n", it->first->data(), it->second, it->first->compare(string("AAA")));
+		printf("%s %i\n", it->first->data(), it->second);
 	}
 }
 
@@ -111,7 +113,6 @@ int injectOrbit(Universe* universe, orbitPair* orbPair)
 		cout << "Finding:>>" << orbPair->parent->data() << "<<" <<endl;
 		cout << "I found " << universe->count(orbPair->parent) << endl;
 		auto iter = universe->find(orbPair->parent);
-		cout << endl << (int) orbPair->parent->data()[3] << endl;
 		if(iter != universe->end()) //The parent exists
 		{
 			distance = iter->second + 1;
@@ -120,8 +121,6 @@ int injectOrbit(Universe* universe, orbitPair* orbPair)
 			//delete orbPair;
 			return distance;
 		}
-		// else
-			// cout << "H*ck we couldn't find it\n";
 		return -1; //Couldn't find where to insert it. Maybe next time?
 	}
 }
@@ -131,7 +130,6 @@ int main()
 {
 	Universe* universe = new Universe(compareStringPointers); //No programmer should have this much power
 	orbitList* orbList = readOrbits();
-	//dumpOrbList(orbList);
 	
 	int totalDepth = 0;
 	int returnedDepth;
@@ -159,13 +157,15 @@ int main()
 			//delete delCel;
 			
 			totalDepth += returnedDepth;
-			dumpOrbList(orbList);
 		}
 		else
 			curCel = curCel->next;
 		
 		if(curCel == NULL)
+		{
 			curCel = orbList;
+			dumpOrbList(orbList);
+		}
 		dumpUniverse(universe);
 	}
 	cout << "Total orbits: " << totalDepth << endl;
