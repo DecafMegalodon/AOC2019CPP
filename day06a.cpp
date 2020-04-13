@@ -10,20 +10,20 @@ There are a total of 3 orbits, 1 direct from bbb, and 1 direct and 1 indirect fr
 */
 #include <iostream>
 #include <string.h>
-#include <map>
+#include <unordered_map>
 #include <vector>
 
 using namespace std;
 
 struct orbitPair
 {
-	string* parent;
-	string* child;
+	string parent;
+	string child;
 	
 	orbitPair(string par, string chi)
 	{
-		parent = new string(par);
-		child = new string(chi);
+		parent = par;
+		child = chi;
 	}
 };
 
@@ -42,14 +42,13 @@ struct orbitList //LL for orbits we haven't figured out where they go in the uni
 	}
 };
 
-// int compareStringPointers(string* str1, string* str2)
-// {
-	// return str1->compare(*str2);
-// }
+auto compareStringPointers = [](const string* str1, const string* str2)
+{
+	printf("Comparing >>%s<< and >>%s<<\n", str1->data(), str2->data());
+	return str1->compare(*str2);
+};
 
-auto compareStringPointers = [](const string* str1, const string* str2) {return str1->compare(*str2);};
-
-typedef map<string*, int, decltype(compareStringPointers)> Universe; //Name of body, steps to reach the COM
+typedef unordered_map<string, int> Universe; //Name of body, steps to reach the COM
 
 
 //Reads the parent-child lists from standard in, in the format of parent)child
@@ -80,7 +79,7 @@ void dumpOrbList(orbitList* list)
 	cout << "These pairs still need a home:\n";
 	while(curCel != NULL)
 	{
-		printf("%s)%s\n", curCel->data->parent->data(), curCel->data->child->data());
+		printf("%s)%s\n", curCel->data->parent.data(), curCel->data->child.data());
 		curCel = curCel->next;
 	}
 }
@@ -90,7 +89,7 @@ void dumpUniverse(Universe* univ)
 	cout << "The universe so far... (Body name, Steps to COM)\n";
 	for(auto it = univ->begin(); it != univ->end(); it++)
 	{
-		printf("%s %i\n", it->first->data(), it->second);
+		printf("%s %i\n", it->first.data(), it->second);
 	}
 }
 
@@ -100,8 +99,10 @@ int injectOrbit(Universe* universe, orbitPair* orbPair)
 {
 	int distance; //Distance to COM
 	//cout << orbPair->parent->data() << endl;
-	if(orbPair->parent->compare("COM") == 0) //Does it directly orbit COM?
+	//cout << "Trying to find a home for " << orbPair->parent.data() << ")" << orbPair->child.data() << endl;
+	if(orbPair->parent.compare("COM") == 0) //Does it directly orbit COM?
 	{
+		//cout << "Direct COM orbit found!\n";
 		distance = 1;
 		universe->emplace(orbPair->child, distance);
 		//delete orbPair->parent;
@@ -110,11 +111,12 @@ int injectOrbit(Universe* universe, orbitPair* orbPair)
 	}
 	else //Maybe the parent is present?
 	{
-		cout << "Finding:>>" << orbPair->parent->data() << "<<" <<endl;
-		cout << "I found " << universe->count(orbPair->parent) << endl;
+		//cout << "Finding:>>" << orbPair->parent.data() << "<<" <<endl;
+		//cout << "I found " << universe->count(orbPair->parent) << endl;
 		auto iter = universe->find(orbPair->parent);
 		if(iter != universe->end()) //The parent exists
 		{
+			//cout << "Parent orbit found!\n";
 			distance = iter->second + 1;
 			universe->emplace(orbPair->child, distance);
 			//delete orbPair->parent;
@@ -128,7 +130,7 @@ int injectOrbit(Universe* universe, orbitPair* orbPair)
 
 int main()
 {
-	Universe* universe = new Universe(compareStringPointers); //No programmer should have this much power
+	Universe* universe = new Universe(); //No programmer should have this much power
 	orbitList* orbList = readOrbits();
 	
 	int totalDepth = 0;
@@ -164,9 +166,9 @@ int main()
 		if(curCel == NULL)
 		{
 			curCel = orbList;
-			dumpOrbList(orbList);
 		}
-		dumpUniverse(universe);
+		//dumpOrbList(orbList);
+		//dumpUniverse(universe);
 	}
 	cout << "Total orbits: " << totalDepth << endl;
 	return 0;
