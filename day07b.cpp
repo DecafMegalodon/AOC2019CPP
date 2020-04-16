@@ -13,7 +13,7 @@ using namespace std;
 
 
 //Our intcode computer. Immediately returns the first value returned by PRNT and halts
-int intCodeInterpreter(int* memory, int thrusterSetting, int thrusterInput)
+int intCodeInterpreter(long* memory, int thrusterSetting, int thrusterInput)
 {
 	//cout << "Booting interpreter\n";
 	bool isOnFirstInput = true;
@@ -29,7 +29,7 @@ int intCodeInterpreter(int* memory, int thrusterSetting, int thrusterInput)
 		switch(opcode->operation)
 		{
 			case ADD: //Add two numbers together and store them. [addend, addend, store]
-				printf("%d + %d\n", readMem(memory, opcode->parameters[0], opcode->paramModes[0]), 
+				printf("%li + %li\n", readMem(memory, opcode->parameters[0], opcode->paramModes[0]), 
 							readMem(memory, opcode->parameters[1], opcode->paramModes[1]));
 				writeMem(memory, readMem(memory, opcode->parameters[0], opcode->paramModes[0])+
 							    readMem(memory, opcode->parameters[1], opcode->paramModes[1]),
@@ -38,7 +38,7 @@ int intCodeInterpreter(int* memory, int thrusterSetting, int thrusterInput)
 
 				break;
 			case MUL: //Multiply two numbers together and store them
-				printf("%d x %d\n", readMem(memory, opcode->parameters[0], opcode->paramModes[0]), 
+				printf("%li x %li\n", readMem(memory, opcode->parameters[0], opcode->paramModes[0]), 
 							readMem(memory, opcode->parameters[1], opcode->paramModes[1]));
 				writeMem(memory, readMem(memory, opcode->parameters[0], opcode->paramModes[0])*
 							    readMem(memory, opcode->parameters[1], opcode->paramModes[1]),
@@ -61,7 +61,7 @@ int intCodeInterpreter(int* memory, int thrusterSetting, int thrusterInput)
 				return readMem(memory, opcode->parameters[0], opcode->paramModes[0]);
 				break;
 			case JIT: //Jump if true. If param 1 != 0, set PC to second. Otherwise NOOP
-				printf("Examining %d in mode %d for jump to %d in mode %d\n", opcode->parameters[0], opcode->paramModes[0], opcode->parameters[1], opcode->paramModes[1]);
+				printf("Examining %li in mode %d for jump to %li in mode %d\n", opcode->parameters[0], opcode->paramModes[0], opcode->parameters[1], opcode->paramModes[1]);
 				if(readMem(memory, opcode->parameters[1], opcode->paramModes[1]) != 0)
 				{
 					pc = readMem(memory, opcode->parameters[0], opcode->paramModes[0]);
@@ -98,7 +98,7 @@ int intCodeInterpreter(int* memory, int thrusterSetting, int thrusterInput)
 	}
 }
 
-void resetMemories(int* refmem, int* memory)
+void resetMemories(long* refmem, long* memory)
 {
 	for(int membank = 0; membank < NUMAMPS; membank++)
 	{
@@ -118,8 +118,8 @@ void printSettings(int amps[5])
 
 int main()
 {
-	int* refMem = new int[MEMSIZE]; //The starting memory for all the amplifiers
-	int* memory = new int[NUMAMPS*MEMSIZE];
+	long* refMem = new long[MEMSIZE]; //The starting memory for all the amplifiers
+	long* memory = new long[NUMAMPS*MEMSIZE];
 	initializeMemory(refMem, MEMSIZE);
 	int maxAmpSoFar= -1;
 	int ampSettings [NUMAMPS] = {5,6,7,8,9};
