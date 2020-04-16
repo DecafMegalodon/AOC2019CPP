@@ -11,7 +11,7 @@ const int NUMAMPS=5;
 using namespace std;
 
 //Our intcode computer. Immediately returns the first value returned by PRNT and halts
-int intCodeInterpreter(int* memory, int thrusterSetting, int thrusterInput)
+int intCodeInterpreter(long* memory, int thrusterSetting, int thrusterInput)
 {
 	bool isOnFirstInput = true;
 	int pc = 0; //The program counter
@@ -78,8 +78,8 @@ int intCodeInterpreter(int* memory, int thrusterSetting, int thrusterInput)
 
 int main()
 {
-	int* memoryBase = new int[MEMSIZE]; //The starting memory for all the amplifiers
-	int* memory = new int[MEMSIZE]; //The working memory for the amps
+	long* memoryBase = new long[MEMSIZE]; //The starting memory for all the amplifiers
+	long* memory = new long[MEMSIZE]; //The working memory for the amps
 	initializeMemory(memoryBase,MEMSIZE);
 	int maxAmpSoFar= -1;
 	int ampSettings [NUMAMPS] = {0,1,2,3,4};
