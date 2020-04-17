@@ -15,6 +15,18 @@ There are a total of 3 orbits, 1 direct from bbb, and 1 direct and 1 indirect fr
 
 using namespace std;
 
+struct orbitBody
+{
+	bool visited = false; //Tracks if we've visited this body for this path searched
+	vector<orbitBody*> adjacents = vector<orbitBody*>();
+	
+	orbitBody(orbitBody* parent)
+	{
+		adjacents.emplace_back(parent);
+	}
+};
+
+//Basically a fancy pair with better names that first and second
 struct orbitPair
 {
 	string parent;
@@ -89,18 +101,14 @@ void dumpUniverse(Universe* univ)
 
 //Puts a child into orbit if the parent is already present, returning the steps to COM, -1 otherwise
 //Cleans up memory objects that are no longer needed
-int injectOrbit(Universe* universe, orbitPair* orbPair)
+bool injectOrbit(Universe* universe, orbitPair* orbPair)
 {
-	int distance; //Distance to COM
-	//cout << orbPair->parent->data() << endl;
-	//cout << "Trying to find a home for " << orbPair->parent.data() << ")" << orbPair->child.data() << endl;
+	int distance = -99999; //Until the universe object is reworked for B side
 	if(orbPair->parent.compare("COM") == 0) //Does it directly orbit COM?
 	{
-		//cout << "Direct COM orbit found!\n";
-		distance = 1;
-		universe->emplace(orbPair->child, distance);
+		universe->emplace(orbPair->child, 0);
 		delete orbPair;
-		return distance;
+		return true;
 	}
 	else //Maybe the parent is present?
 	{
@@ -110,27 +118,21 @@ int injectOrbit(Universe* universe, orbitPair* orbPair)
 			distance = iter->second + 1;
 			universe->emplace(orbPair->child, distance);
 			delete orbPair;
-			return distance;
+			return true;
 		}
-		return -1; //Couldn't find where to insert it. Maybe next time?
+		return false; //Couldn't find where to insert it. Maybe next time?
 	}
 }
 
-
-int main()
+//Let's find homes for all these things floating in space!
+void buildUniverse(Universe* universe, orbitList* orbList)
 {
-	Universe* universe = new Universe(); //No programmer should have this much power
-	orbitList* orbList = readOrbits();
-	
-	int totalDepth = 0;
-	int returnedDepth;
 	orbitList* curCel = orbList;
-	orbitList* delCel = NULL; //If we need to //delete a cell
+	orbitList* delCel = NULL; //If we need to delete a cell
 	
 	while(orbList != NULL)
 	{
-		returnedDepth = injectOrbit(universe, curCel->data);
-		if(returnedDepth != -1) //We found the parent (or COM) in the universe!
+		if(injectOrbit(universe, curCel->data)) //We found the parent (or COM) in the universe!
 		{
 			if(curCel->last == NULL) //Are we looking at the first cell?
 				orbList = curCel->next;
@@ -145,8 +147,6 @@ int main()
 			delCel = curCel;
 			curCel = curCel->next;
 			delete delCel;
-			
-			totalDepth += returnedDepth;
 		}
 		else
 			curCel = curCel->next;
@@ -156,7 +156,15 @@ int main()
 			curCel = orbList;
 		}
 	}
-	cout << totalDepth << endl;
+}
+
+
+int main()
+{
+	Universe* universe = new Universe(); //No programmer should have this much power
+	orbitList* orbList = readOrbits();
+	buildUniverse(universe, orbList);
+	
 	return 0;
 }
 
