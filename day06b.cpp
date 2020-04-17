@@ -18,11 +18,14 @@ using namespace std;
 struct orbitBody
 {
 	bool visited = false; //Tracks if we've visited this body for this path searched
+	string name;
 	vector<orbitBody*> adjacents = vector<orbitBody*>();
 	
-	orbitBody(orbitBody* parent)
+	orbitBody(orbitBody* parent, string nam)
 	{
-		adjacents.emplace_back(parent);
+		if(parent != NULL)
+			adjacents.emplace_back(parent);
+		name = nam;
 	}
 };
 
@@ -54,8 +57,7 @@ struct orbitList //LL for orbits we haven't figured out where they go in the uni
 	}
 };
 
-typedef unordered_map<string, int> Universe; //Name of body, steps to reach the COM
-
+typedef unordered_map<string, orbitBody*> Universe;
 
 //Reads the parent-child lists from standard in, in the format of parent)child
 orbitList* readOrbits()
@@ -95,7 +97,7 @@ void dumpUniverse(Universe* univ)
 	cout << "The universe so far... (Body name, Steps to COM)\n";
 	for(auto it = univ->begin(); it != univ->end(); it++)
 	{
-		printf("%s %i\n", it->first.data(), it->second);
+		printf("%s\n", it->first.data());
 	}
 }
 
@@ -103,25 +105,16 @@ void dumpUniverse(Universe* univ)
 //Cleans up memory objects that are no longer needed
 bool injectOrbit(Universe* universe, orbitPair* orbPair)
 {
-	int distance = -99999; //Until the universe object is reworked for B side
-	if(orbPair->parent.compare("COM") == 0) //Does it directly orbit COM?
+	auto iter = universe->find(orbPair->parent);
+	if(iter != universe->end()) //The parent exists
 	{
-		universe->emplace(orbPair->child, 0);
+		orbitBody* objectNew = new orbitBody(iter->second, orbPair->child);
+		universe->emplace(orbPair->child, objectNew);
+		iter->second->adjacents.emplace_back(objectNew);
 		delete orbPair;
 		return true;
 	}
-	else //Maybe the parent is present?
-	{
-		auto iter = universe->find(orbPair->parent);
-		if(iter != universe->end()) //The parent exists
-		{
-			distance = iter->second + 1;
-			universe->emplace(orbPair->child, distance);
-			delete orbPair;
-			return true;
-		}
-		return false; //Couldn't find where to insert it. Maybe next time?
-	}
+	return false; //Couldn't find where to insert it. Maybe next time?
 }
 
 //Let's find homes for all these things floating in space!
@@ -129,6 +122,8 @@ void buildUniverse(Universe* universe, orbitList* orbList)
 {
 	orbitList* curCel = orbList;
 	orbitList* delCel = NULL; //If we need to delete a cell
+	
+	universe -> emplace("COM", new orbitBody(NULL, "COM"));
 	
 	while(orbList != NULL)
 	{
@@ -164,6 +159,7 @@ int main()
 	Universe* universe = new Universe(); //No programmer should have this much power
 	orbitList* orbList = readOrbits();
 	buildUniverse(universe, orbList);
+	dumpUniverse(universe);
 	
 	return 0;
 }
