@@ -25,7 +25,7 @@ int intCodeInterpreter(long* memory, int thrusterSetting, int thrusterInput)
 			return INT_MIN; //If we encounter the EXIT opcode, stop the interpreter
 		printf("[%5d] %4s\n", pc, OPCODENAMES[opcode->operation]);
 		pc += OPCODEPARAMS[opcode->operation] + 1;
-		printRAM(memory, 320);
+		//printRAM(memory, 320);
 		switch(opcode->operation)
 		{
 			case ADD: //Add two numbers together and store them. [addend, addend, store]
@@ -98,12 +98,17 @@ int intCodeInterpreter(long* memory, int thrusterSetting, int thrusterInput)
 	}
 }
 
-void resetMemories(long* refmem, long* memory)
+void resetMemories(long* referenceMem, long** ampBanks)
 {
-	for(int membank = 0; membank < NUMAMPS; membank++)
+	long* ampMem;
+	for(int ampID = 0; ampID < NUMAMPS; ampID++)
 	{
-		std::memcpy(memory+MEMSIZE*membank,refmem,MEMSIZE); //Reset the RAM for the AMP
+		ampMem = new long[MEMSIZE];
+		for(int addr = 0; addr < MEMSIZE; addr++)
+			ampMem[addr] = referenceMem[addr];
+		ampBanks[ampID] = ampMem;
 	}
+	printRAM(ampBanks[0], MEMSIZE);
 }
 
 void printSettings(int amps[5])
@@ -119,7 +124,7 @@ void printSettings(int amps[5])
 int main()
 {
 	long* refMem = new long[MEMSIZE]; //The starting memory for all the amplifiers
-	long* memory = new long[NUMAMPS*MEMSIZE];
+	long** memory = new long*[NUMAMPS];
 	initializeMemory(refMem, MEMSIZE);
 	int maxAmpSoFar= -1;
 	int ampSettings [NUMAMPS] = {5,6,7,8,9};
@@ -136,7 +141,7 @@ int main()
 			{
 				//disassembleRAM(memory+amp*MEMSIZE, MEMSIZE);
 				cout << "Amp no " << amp << endl;
-				ampIO = intCodeInterpreter(memory+amp*MEMSIZE, ampSettings[amp], ampIO);
+				ampIO = intCodeInterpreter(memory[amp], ampSettings[amp], ampIO);
 				cout << "ampIO = " << ampIO << endl;
 				if(ampIO == INT_MIN)
 				{
