@@ -29,7 +29,8 @@ struct orbitBody
 	}
 };
 
-//Basically a fancy pair with better names that first and second
+//Basically a fancy pair with better names that first and second.
+//For holding parent)child pairs that haven't been added to the universe yet
 struct orbitPair
 {
 	string parent;
@@ -153,13 +154,37 @@ void buildUniverse(Universe* universe, orbitList* orbList)
 	}
 }
 
+//Find the distance between two objects in the universe.
+//Distance so far if it was able to find it, -1 otherwise;
+int findDistance(Universe* universe, orbitBody* start, orbitBody* end)
+{
+	int returnVal = -1;
+	if(start == end) //A wild pointer comparison appeared
+		return 0;
+	else
+	{
+		start->visited=true;
+		auto iter = start->adjacents.begin();
+		for(    ;iter != start->adjacents.end(); iter++)
+		{
+			if(!(*iter)->visited)
+				returnVal = findDistance(universe, (*iter),end);
+			if(returnVal != -1)
+				return returnVal + 1;
+		}
+	}
+	return returnVal;
+}
+
 
 int main()
 {
 	Universe* universe = new Universe(); //No programmer should have this much power
 	orbitList* orbList = readOrbits();
 	buildUniverse(universe, orbList);
-	dumpUniverse(universe);
+	orbitBody* me = universe->find("YOU")->second;
+	orbitBody* santa = universe->find("SAN")->second;
+	cout << findDistance(universe,me,santa)-2 << endl;
 	
 	return 0;
 }
