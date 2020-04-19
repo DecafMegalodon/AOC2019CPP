@@ -26,12 +26,16 @@ bool writeSpot(char* space, const int y, const int x, const char c)
 		return false;
 }
 
+void cloneSpace(char* reference, char* target)
+{
+	memcpy(target, reference, SPACEWIDTH*SPACEHEIGHT*sizeof(char));
+}
+
 void printSpace(const char* space)
 {
 	for(int line = 0; line < SPACEHEIGHT; line++)
 	{
-		//scanf("%21c\n", &space[line*SPACEWIDTH]);
-		//printf("%21s\n", &space[line*SPACEWIDTH]);
+		printf("%21s\n", &space[line*SPACEWIDTH]);
 	}
 }
 
@@ -40,17 +44,19 @@ void readSpace(char* space)
 	for(int line = 0; line < SPACEHEIGHT; line++)
 	{
 		scanf("%21c\n", &space[line*SPACEWIDTH]);
-		printf("%21s\n", &space[line*SPACEWIDTH]);
+		//printf("%21s\n", &space[line*SPACEWIDTH]);
 	}
 }
 
+//Alters the space map. Replaces invisible asteroids (#) from y,x's vantage point with "
+void hideInvisible(char* space)
+{
+	
+}
 
 int main()
 {
-	printf("Running\n");
-	char* space = new char[SPACEHEIGHT*SPACEWIDTH];
-	readSpace(space);
-	//printSpace(space);
-	delete space; //Goodbye, world
+	char* refSpace = new char[SPACEHEIGHT*SPACEWIDTH];
+	readSpace(refSpace);
 	return 0;
 }
