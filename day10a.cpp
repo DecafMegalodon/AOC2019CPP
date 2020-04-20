@@ -9,6 +9,7 @@ using namespace std;
 const int SPACEWIDTH = 21;
 const int SPACEHEIGHT = 21; //Hmm, I could have sworn there were three dimensions in space.
 
+//Computes the Greatest Common Demoninator of the two numbers.
 int GCD(int a, int b)
 {
 	int t;
@@ -87,7 +88,6 @@ void hideInvisible(char* space, const int y, const int x)
 	int deltaY;
 	int multiplier;
 	int gcd;
-	printf("Pruning for observatory at %i, %i\n", x, y);
 	for(int curY = 0; curY < SPACEWIDTH; curY++)
 	{
 		for(int curX = 0; curX < SPACEWIDTH; curX++)
@@ -102,9 +102,7 @@ void hideInvisible(char* space, const int y, const int x)
 				gcd = GCD(deltaX, deltaY);
 				deltaY /= gcd;
 				deltaX /= gcd;
-				//printf("GCD'd deltas = %i, %i. GCD = %i \n",deltaX, deltaY, gcd);
 				multiplier = 1;
-				//printf("Because of the asteroid at %i, %i...\n", curX, curY);
 				while(writeSpot(space, curY+(deltaY*multiplier), curX+(deltaX*multiplier), 'X'))
 					multiplier++;
 				
@@ -142,10 +140,7 @@ int main()
 				hideInvisible(workingSpace, y, x);
 				visibleHere = countVisibleAsteroids(workingSpace);
 				mostAsteroidsVisibleSoFar = max(mostAsteroidsVisibleSoFar, visibleHere);
-				printf("At %i, %i there are %i visible\n", x, y, visibleHere);
 			}
-			// else
-				// printf("No asteroid found at %i, %i\n", x, y);
 		}
 	}
 	cout << mostAsteroidsVisibleSoFar << endl;
