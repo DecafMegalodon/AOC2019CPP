@@ -6,28 +6,19 @@
 
 using namespace std;
 
-const int SPACEWIDTH = 10;
-const int SPACEHEIGHT = 10; //Hmm, I could have sworn there were three dimensions in space.
+const int SPACEWIDTH = 21;
+const int SPACEHEIGHT = 21; //Hmm, I could have sworn there were three dimensions in space.
 
-//Checks a spot in space and returns what's there. Returns \0 if it's out of bounds
-char readSpot(const char* space, const int y, const int x)
+int GCD(int a, int b)
 {
-	if(y>=0 && y<SPACEHEIGHT && x>=0 && x<SPACEWIDTH)
-		return space[y*SPACEWIDTH+x];
-	else
-		return '\0';
-}
-
-//Writes to a spot in the universe. Returns true, but returns false if outside of bounds
-bool writeSpot(char* space, const int y, const int x, const char c)
-{
-	if(y>=0 && y<SPACEHEIGHT && x>=0 && x<SPACEWIDTH)
+	int t;
+	while (b != 0)
 	{
-		space[y*SPACEWIDTH+x] = c;
-		return true;
+		t = b;
+		b = a % b;
+		a = t;
 	}
-	else
-		return false;
+	return abs(a);
 }
 
 //Copies reference into target
@@ -51,8 +42,31 @@ void readSpace(char* space)
 {
 	for(int line = 0; line < SPACEHEIGHT; line++)
 	{
-		scanf("%10c\n", &space[line*SPACEWIDTH]);
+		scanf("%21c\n", &space[line*SPACEWIDTH]);
 	}
+}
+
+//Checks a spot in space and returns what's there. Returns \0 if it's out of bounds
+char readSpot(const char* space, const int y, const int x)
+{
+	if(y>=0 && y<SPACEHEIGHT && x>=0 && x<SPACEWIDTH)
+		return space[y*SPACEWIDTH+x];
+	else
+		return '\0';
+}
+
+//Writes to a spot in the universe. Returns true, but returns false if outside of bounds
+bool writeSpot(char* space, const int y, const int x, const char c)
+{
+	if(y>=0 && y<SPACEHEIGHT && x>=0 && x<SPACEWIDTH)
+	{
+		//printf("Writing %c to %i, %i\n", c, x, y);
+		space[y*SPACEWIDTH+x] = c;
+		//printSpace(space);
+		return true;
+	}
+	else
+		return false;
 }
 
 //Returns true if a number is prime, false otherwise.
@@ -68,52 +82,46 @@ bool isPrime(int num)
 //Alters the space map. Replaces invisible asteroids (#) from y,x's vantage point with .
 void hideInvisible(char* space, const int y, const int x)
 {
-	int curX;
-	int curY;
-	char checkedChar;
+	char curChar;
+	int deltaX;
+	int deltaY;
 	int multiplier;
-	bool isOccluding; //If we've found an asteroid, it will occlude ones beyond it
-	//printf("Pruning %i, %i\n", x,y);
-	for(int deltaY = -SPACEHEIGHT; deltaY < SPACEHEIGHT; deltaY++)
+	int gcd;
+	printf("Pruning for observatory at %i, %i\n", x, y);
+	for(int curY = 0; curY < SPACEWIDTH; curY++)
 	{
-		if(!isPrime(deltaY)) continue;
-		for(int deltaX = -SPACEHEIGHT; deltaX < SPACEHEIGHT; deltaX++)
+		for(int curX = 0; curX < SPACEWIDTH; curX++)
 		{
-			if(!isPrime(deltaX)) continue;
-			if(deltaX==0 && deltaY==0) continue;
-			isOccluding = false;
-			for(multiplier = 1; true; multiplier++)
+			if(curX == x && curY == y)
+				continue; //Our origin asteroid doesn't occlude others
+			curChar = readSpot(space,curY,curX);
+			if(curChar == '#') //Are we checking an asteroid?
 			{
-				curX = x+deltaX*multiplier;
-				curY = y+deltaY*multiplier;
-				checkedChar = readSpot(space, curY, curX);
-				if(checkedChar == '\0') //Are we out of bounds?
-					break;
-				//printf("deltaX = %i, deltaY = %i, curX = %i, curY = %i, mult = %i, curChar=%c\n",deltaX, deltaY, curX, curY, multiplier, checkedChar);
-				if(isOccluding) //Have we already lost line of sight to an asteroid?
-				{
-					writeSpot(space,curY,curX,',');
-					//printSpace(space);
-				}
-				else if(checkedChar == '#') //Will we lose LOS to an asteroid?
-				{
-					isOccluding = true;
-					//cout << "Pruning mode activated\n";
-				}
+				deltaX = curX-x;
+				deltaY = curY-y;
+				gcd = GCD(deltaX, deltaY);
+				deltaY /= gcd;
+				deltaX /= gcd;
+				//printf("GCD'd deltas = %i, %i. GCD = %i \n",deltaX, deltaY, gcd);
+				multiplier = 1;
+				//printf("Because of the asteroid at %i, %i...\n", curX, curY);
+				while(writeSpot(space, curY+(deltaY*multiplier), curX+(deltaX*multiplier), 'X'))
+					multiplier++;
+				
 			}
-
 		}
 	}
 }
 
-//Counts the asteroids that are still visible
+//Counts the asteroids that are still visible.
+//Assumes one of them is the observatory, which isn't counted
 int countVisibleAsteroids(char* space)
 {
 	int count=0;
 	for(int charNum = 0; charNum < SPACEHEIGHT*SPACEWIDTH; charNum++)
 		if(space[charNum] == '#')
 			count++;
-	return count;
+	return count - 1;
 }
 
 int main()
@@ -123,7 +131,7 @@ int main()
 	int mostAsteroidsVisibleSoFar = -1;
 	int visibleHere;
 	readSpace(refSpace);
-	printSpace(refSpace);
+	//printSpace(refSpace);
 	for(int y=0; y<SPACEHEIGHT; y++)
 	{
 		for(int x = 0; x < SPACEWIDTH; x++)
@@ -136,8 +144,10 @@ int main()
 				mostAsteroidsVisibleSoFar = max(mostAsteroidsVisibleSoFar, visibleHere);
 				printf("At %i, %i there are %i visible\n", x, y, visibleHere);
 			}
+			// else
+				// printf("No asteroid found at %i, %i\n", x, y);
 		}
 	}
-	cout << mostAsteroidsVisibleSoFar-1 << endl;
+	cout << mostAsteroidsVisibleSoFar << endl;
 	return 0;
 }
