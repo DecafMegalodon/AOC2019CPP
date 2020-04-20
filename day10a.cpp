@@ -6,15 +6,14 @@
 
 using namespace std;
 
-const int SPACEWIDTH = 21;
-const int SPACEHEIGHT = 21; //Hmm, I could have sworn there were three dimensions in space.
+const int SPACEWIDTH = 5;
+const int SPACEHEIGHT = 5; //Hmm, I could have sworn there were three dimensions in space.
 
 //Checks a spot in space and returns what's there. Returns \0 if it's out of bounds
 char readSpot(const char* space, const int y, const int x)
 {
-	printf("Checking %i, %i\n", x,y);
 	if(y>=0 && y<SPACEHEIGHT && x>=0 && x<SPACEWIDTH)
-		return space[y*SPACEHEIGHT+SPACEWIDTH];
+		return space[y*SPACEWIDTH+x];
 	else
 		return '\0';
 }
@@ -40,9 +39,10 @@ void cloneSpace(const char* reference, char* target)
 //Prints the current state of space to stdout
 void printSpace(const char* space)
 {
+	cout << "Space so far...\n";
 	for(int line = 0; line < SPACEHEIGHT; line++)
 	{
-		printf("%21s\n", &space[line*SPACEWIDTH]);
+		printf("%.*s\n", SPACEWIDTH, &space[line*SPACEWIDTH]);
 	}
 }
 
@@ -51,8 +51,7 @@ void readSpace(char* space)
 {
 	for(int line = 0; line < SPACEHEIGHT; line++)
 	{
-		scanf("%21c\n", &space[line*SPACEWIDTH]);
-		//printf("%21s\n", &space[line*SPACEWIDTH]);
+		scanf("%5c\n", &space[line*SPACEWIDTH]);
 	}
 }
 
@@ -76,6 +75,7 @@ void hideInvisible(char* space, const int y, const int x)
 	char checkedChar;
 	int multiplier;
 	bool isOccluding; //If we've found an asteroid, it will occlude ones beyond it
+	printf("Pruning %i, %i\n", x,y);
 	for(int deltaY = -SPACEHEIGHT; deltaY < SPACEHEIGHT; deltaY++)
 	{
 		if(!isPrime(deltaY)) continue;
@@ -83,7 +83,7 @@ void hideInvisible(char* space, const int y, const int x)
 		{
 			if(!isPrime(deltaX)) continue;
 			isOccluding = false;
-			for(multiplier = 1; false; multiplier++)
+			for(multiplier = 1; true; multiplier++)
 			{
 				curX = x+deltaX*multiplier;
 				curY = y+deltaY*multiplier;
@@ -91,7 +91,10 @@ void hideInvisible(char* space, const int y, const int x)
 				if(checkedChar == '\0') //Are we out of bounds?
 					break;
 				else if(isOccluding) //Have we already lost line of sight to an asteroid?
-					writeSpot(space,curY,curX,'.');
+				{
+					writeSpot(space,curY,curX,',');
+					printSpace(space);
+				}
 				else if(checkedChar == '#') //Will we lose LOS to an asteroid?
 					isOccluding = true;
 			}
@@ -115,17 +118,21 @@ int main()
 	char* refSpace = new char[SPACEHEIGHT*SPACEWIDTH];
 	char* workingSpace = new char[SPACEHEIGHT*SPACEWIDTH];
 	int mostAsteroidsVisibleSoFar = -1;
+	int visibleHere;
 	readSpace(refSpace);
+	printSpace(refSpace);
 	for(int y=0; y<SPACEHEIGHT; y++)
 	{
 		for(int x = 0; x < SPACEWIDTH; x++)
 		{
-			if(readSpot(workingSpace,y,x) == '#')
-				continue; //The observatory must be on an asteroid
-			printf("Checking %i, %i\n", x,y);
-			cloneSpace(refSpace, workingSpace);
-			hideInvisible(workingSpace, y, x);
-			mostAsteroidsVisibleSoFar = max(mostAsteroidsVisibleSoFar, countVisibleAsteroids(workingSpace));
+			if(readSpot(refSpace,y,x) == '#') //Observatories can only go on asteroids
+			{
+				cloneSpace(refSpace, workingSpace);
+				hideInvisible(workingSpace, y, x);
+				visibleHere = countVisibleAsteroids(workingSpace);
+				mostAsteroidsVisibleSoFar = max(mostAsteroidsVisibleSoFar, visibleHere);
+				printf("At %i, %i there are %i visible\n", x, y, visibleHere);
+			}
 		}
 	}
 	cout << mostAsteroidsVisibleSoFar << endl;
