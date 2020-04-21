@@ -7,7 +7,7 @@
 using namespace std;
 
 const int SPACEWIDTH = 21;
-const int SPACEHEIGHT = 21; //Hmm, I could have sworn there were three dimensions in space.
+const int SPACEHEIGHT = 21; //Hmm, I could have sworn there were three (or more) dimensions in space.
 
 //Computes the Greatest Common Demoninator of the two numbers.
 int GCD(int a, int b)
@@ -113,7 +113,7 @@ void hideInvisible(char* space, const int y, const int x)
 
 //Counts the asteroids that are still visible.
 //Assumes one of them is the observatory, which isn't counted
-int countVisibleAsteroids(char* space)
+int countVisibleAsteroids(const char* space)
 {
 	int count=0;
 	for(int charNum = 0; charNum < SPACEHEIGHT*SPACEWIDTH; charNum++)
@@ -122,27 +122,47 @@ int countVisibleAsteroids(char* space)
 	return count - 1;
 }
 
-int main()
+//returns an x,y pair with the location of the best (most visible asteroids) observatory
+pair<int,int>* findBestStationLocation(const char* space)
 {
-	char* refSpace = new char[SPACEHEIGHT*SPACEWIDTH];
 	char* workingSpace = new char[SPACEHEIGHT*SPACEWIDTH];
+	pair<int,int>* best  = new pair<int,int>;
 	int mostAsteroidsVisibleSoFar = -1;
 	int visibleHere;
-	readSpace(refSpace);
-	//printSpace(refSpace);
 	for(int y=0; y<SPACEHEIGHT; y++)
 	{
 		for(int x = 0; x < SPACEWIDTH; x++)
 		{
-			if(readSpot(refSpace,y,x) == '#') //Observatories can only go on asteroids
+			if(readSpot(space,y,x) == '#') //Observatories can only go on asteroids
 			{
-				cloneSpace(refSpace, workingSpace);
+				cloneSpace(space, workingSpace);
 				hideInvisible(workingSpace, y, x);
 				visibleHere = countVisibleAsteroids(workingSpace);
+				if(visibleHere > mostAsteroidsVisibleSoFar)
+				{
+					mostAsteroidsVisibleSoFar = visibleHere;
+					best->first=x;
+					best->second=y;
+				}
 				mostAsteroidsVisibleSoFar = max(mostAsteroidsVisibleSoFar, visibleHere);
 			}
 		}
 	}
+	delete workingSpace;
 	cout << mostAsteroidsVisibleSoFar << endl;
+	return best;
+}
+
+int main()
+{
+	char* refSpace = new char[SPACEHEIGHT*SPACEWIDTH];
+	readSpace(refSpace);
+	int totalAsteroids = countVisibleAsteroids(refSpace);
+	pair<int,int>* bestSpot = findBestStationLocation(refSpace);
+	
+	printf("The best spot is at %i, %i\n", bestSpot->first, bestSpot->second);
+	
+	delete bestSpot;
+	delete refSpace;
 	return 0;
 }
