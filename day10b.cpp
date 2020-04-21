@@ -56,14 +56,19 @@ char readSpot(const char* space, const int y, const int x)
 		return '\0';
 }
 
-//Writes to a spot in the universe. Returns true, but returns false if outside of bounds
+//Writes to a spot in the universe. Returns true, but returns false if outside of bounds.
+//When passed '+', it will hide asteroids. When passed 'x' (or anything else) it will VAPORIZE them into a '.'
 bool writeSpot(char* space, const int y, const int x, const char c)
 {
 	if(y>=0 && y<SPACEHEIGHT && x>=0 && x<SPACEWIDTH)
 	{
-		//printf("Writing %c to %i, %i\n", c, x, y);
-		space[y*SPACEWIDTH+x] = c;
-		//printSpace(space);
+		if(c == '+')
+		{
+			if(space[y*SPACEWIDTH+x] == '#')
+				space[y*SPACEWIDTH+x] = '.';
+		}
+		else
+			space[y*SPACEWIDTH+x] = '.';
 		return true;
 	}
 	else
@@ -80,7 +85,7 @@ bool isPrime(int num)
 	return true;
 }
 
-//Alters the space map. Replaces invisible asteroids (#) from y,x's vantage point with .
+//Alters the space map. Replaces invisible asteroids (#) from y,x's vantage point with +
 void hideInvisible(char* space, const int y, const int x)
 {
 	char curChar;
@@ -103,7 +108,7 @@ void hideInvisible(char* space, const int y, const int x)
 				deltaY /= gcd;
 				deltaX /= gcd;
 				multiplier = 1;
-				while(writeSpot(space, curY+(deltaY*multiplier), curX+(deltaX*multiplier), 'X'))
+				while(writeSpot(space, curY+(deltaY*multiplier), curX+(deltaX*multiplier), '+'))
 					multiplier++;
 				
 			}
