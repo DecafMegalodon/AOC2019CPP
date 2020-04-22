@@ -164,8 +164,15 @@ int main()
 	readSpace(refSpace);
 	int totalAsteroids = countVisibleAsteroids(refSpace);
 	pair<int,int>* bestSpot = findBestStationLocation(refSpace);
-	
 	printf("The best spot is at %i, %i\n", bestSpot->first, bestSpot->second);
+	/*While there are still asteroids:
+		Find the ones that are visible
+		Sort them by angle into the vaporization queue
+		Remove them from the map
+	Pull the 200th in the queue for the answer. We could stop as soon as we had at least 200 meteors in the queue...
+		but where's the fun of leaving meteors?
+	*/
+	
 	
 	delete bestSpot;
 	delete refSpace;
