@@ -3,6 +3,7 @@
 #include <vector>
 #include <cstring>
 #include <math.h>
+#include <algorithm>    // std::sort
 
 using namespace std;
 
@@ -184,7 +185,7 @@ void restoreInvisibleAsteroids(char* space)
 {
 	for(int charNum = 0; charNum < SPACEHEIGHT*SPACEWIDTH; charNum++)
 	{
-		if(space[charNum == '+'])
+		if(space[charNum] == '+')
 			space[charNum] = '#';
 	}
 }
@@ -192,7 +193,7 @@ void restoreInvisibleAsteroids(char* space)
 //Queues all visible meteoroids for vaporization, and marks them as gone on the map
 //startpoint is how many meteors we've already vaporized
 //Returns how many were vaporized this phase
-int queueVaporizations(char* space, meteor* meteorList[], int startPoint)
+int queueVaporizations(char* space, meteor* meteorList[], const int startPoint)
 {
 	int vaporized = 0;
 	int x;
@@ -200,7 +201,7 @@ int queueVaporizations(char* space, meteor* meteorList[], int startPoint)
 	double angle;
 	for(int charNum = 0; charNum < SPACEHEIGHT*SPACEWIDTH; charNum++)
 	{
-		if(space[charNum == '#'])
+		if(space[charNum] == '#')
 		{
 			space[charNum] = '.';
 			x = charNum % SPACEWIDTH;
@@ -213,6 +214,7 @@ int queueVaporizations(char* space, meteor* meteorList[], int startPoint)
 	return vaporized;
 }
 
+
 int main()
 {
 	char* refSpace = new char[SPACEHEIGHT*SPACEWIDTH];
@@ -222,13 +224,16 @@ int main()
 	printf("The best spot is at %i, %i\n", bestSpot->first, bestSpot->second);
 	meteor** vaporizationQueue = new meteor*[totalAsteroids];
 	int meteorsVaporizedSoFar = 0;
-	int meteorsVaporizedThisPhase = 0;
+	int meteorsVaporizedThisPhase;
 	while(countVisibleAsteroids(refSpace) != 0)
 	{
 		hideInvisible(refSpace, bestSpot->second, bestSpot->first); //Find visible asteroids
 		meteorsVaporizedThisPhase = queueVaporizations(refSpace, vaporizationQueue, meteorsVaporizedSoFar); //Add them to the array, and VAPORIZE them
-		//Sort the newly added ones as a group.
-		//Restore the remaining invisible asteroids for the next round
+		std::sort(&vaporizationQueue[meteorsVaporizedSoFar], &vaporizationQueue[meteorsVaporizedSoFar+meteorsVaporizedThisPhase]); //Sort the meteoroids from this phase
+		meteorsVaporizedSoFar += meteorsVaporizedThisPhase;
+		restoreInvisibleAsteroids(refSpace);
+		cout << meteorsVaporizedThisPhase << " vaporized!\n";
+		printSpace(refSpace);
 	}
 	
 	
