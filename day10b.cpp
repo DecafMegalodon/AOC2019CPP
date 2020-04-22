@@ -78,20 +78,14 @@ char readSpot(const char* space, const int y, const int x)
 		return '\0';
 }
 
-//Writes to a spot in the universe. Returns true, but returns false if outside of bounds.
-//When passed '+', it will hide asteroids. When passed 'x' (or anything else) it will VAPORIZE them into a '.'
-bool writeSpot(char* space, const int y, const int x, const char c)
+//Hides a meteor at the given y,x coordinate. If there's no meteorite, it does nothing.
+//Returns false if outside of bounds and does nothing.
+bool hideSpot(char* space, const int y, const int x)
 {
 	if(y>=0 && y<SPACEHEIGHT && x>=0 && x<SPACEWIDTH)
 	{
-		if(c == '+')
-		{
-			if(space[y*SPACEWIDTH+x] == '#')
-				space[y*SPACEWIDTH+x] = '.';
-		}
-		else
-			space[y*SPACEWIDTH+x] = '.';
-		return true;
+		if(space[y*SPACEWIDTH+x] == '#')
+			space[y*SPACEWIDTH+x] = '+';
 	}
 	else
 		return false;
@@ -130,7 +124,7 @@ void hideInvisible(char* space, const int y, const int x)
 				deltaY /= gcd;
 				deltaX /= gcd;
 				multiplier = 1;
-				while(writeSpot(space, curY+(deltaY*multiplier), curX+(deltaX*multiplier), '+'))
+				while(hideSpot(space, curY+(deltaY*multiplier), curX+(deltaX*multiplier)))
 					multiplier++;
 				
 			}
@@ -227,13 +221,13 @@ int main()
 	int meteorsVaporizedThisPhase;
 	while(countVisibleAsteroids(refSpace) != 0)
 	{
+		printSpace(refSpace);
 		hideInvisible(refSpace, bestSpot->second, bestSpot->first); //Find visible asteroids
 		meteorsVaporizedThisPhase = queueVaporizations(refSpace, vaporizationQueue, meteorsVaporizedSoFar); //Add them to the array, and VAPORIZE them
 		std::sort(&vaporizationQueue[meteorsVaporizedSoFar], &vaporizationQueue[meteorsVaporizedSoFar+meteorsVaporizedThisPhase]); //Sort the meteoroids from this phase
 		meteorsVaporizedSoFar += meteorsVaporizedThisPhase;
 		restoreInvisibleAsteroids(refSpace);
 		cout << meteorsVaporizedThisPhase << " vaporized!\n";
-		printSpace(refSpace);
 	}
 	
 	
