@@ -9,6 +9,26 @@ using namespace std;
 const int SPACEWIDTH = 21;
 const int SPACEHEIGHT = 21; //Hmm, I could have sworn there were three (or more) dimensions in space.
 
+struct meteor
+{
+	int x;
+	int y;
+	double angle;
+	
+	meteor(int xpos, int ypos, double ang)
+	{
+		x=xpos;
+		y=ypos;
+		angle=ang;
+	}
+	
+	bool operator<(const meteor* meteor2)
+	{
+		return angle < meteor2->angle;
+	}
+	
+};
+
 //Computes the Greatest Common Demoninator of the two numbers.
 int GCD(int a, int b)
 {
@@ -158,6 +178,16 @@ pair<int,int>* findBestStationLocation(const char* space)
 	return best;
 }
 
+//Restores hidden asteroids ('+') to normal ('#')
+void restoreInvisibleAsteroids(char* space)
+{
+	for(int charNum = 0; charNum < SPACEHEIGHT*SPACEWIDTH; charNum++)
+	{
+		if(space[charNum == '+'])
+			space[charNum] = '#';
+	}
+}
+
 int main()
 {
 	char* refSpace = new char[SPACEHEIGHT*SPACEWIDTH];
@@ -165,12 +195,23 @@ int main()
 	int totalAsteroids = countVisibleAsteroids(refSpace);
 	pair<int,int>* bestSpot = findBestStationLocation(refSpace);
 	printf("The best spot is at %i, %i\n", bestSpot->first, bestSpot->second);
+	meteor* vaporizationQueue = new meteor[totalAsteroids];
+	meteorsVaporizedSoFar = 0;
+	meteorsVaporizedThisPhase = 0;
+	while(countVisibleAsteroids(refSpace) != 0)
+	{
+		//Find visible visible asteroids
+		//Add them to the array, and VAPORIZE them
+		//Sort the newly added ones as a group.
+		//Restore the remaining invisible asteroids for the next round
+	}
+	
 	/*While there are still asteroids:
 		Find the ones that are visible
 		Sort them by angle into the vaporization queue
 		Remove them from the map
-	Pull the 200th in the queue for the answer. We could stop as soon as we had at least 200 meteors in the queue...
-		but where's the fun of leaving meteors?
+	Pull the 200th in the queue for the answer. We could stop as soon as we had
+		 at least 200 meteors in the queue... but where's the fun of leaving meteors?
 	*/
 	
 	
