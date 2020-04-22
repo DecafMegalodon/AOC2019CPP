@@ -9,6 +9,7 @@ using namespace std;
 const int SPACEWIDTH = 21;
 const int SPACEHEIGHT = 21; //Hmm, I could have sworn there were three (or more) dimensions in space.
 
+//Technically, these are meteroids according to the "lore" of the challenge
 struct meteor
 {
 	int x;
@@ -188,6 +189,30 @@ void restoreInvisibleAsteroids(char* space)
 	}
 }
 
+//Queues all visible meteoroids for vaporization, and marks them as gone on the map
+//startpoint is how many meteors we've already vaporized
+//Returns how many were vaporized this phase
+int queueVaporizations(char* space, meteor* meteorList[], int startPoint)
+{
+	int vaporized = 0;
+	int x;
+	int y;
+	double angle;
+	for(int charNum = 0; charNum < SPACEHEIGHT*SPACEWIDTH; charNum++)
+	{
+		if(space[charNum == '#'])
+		{
+			space[charNum] = '.';
+			x = charNum % SPACEWIDTH;
+			y = (charNum-x)/SPACEWIDTH;
+			angle = atan((double) y/x);
+			meteorList[startPoint+vaporized] = new meteor(x, y, angle);
+			vaporized++;
+		}
+	}
+	return vaporized;
+}
+
 int main()
 {
 	char* refSpace = new char[SPACEHEIGHT*SPACEWIDTH];
@@ -195,24 +220,16 @@ int main()
 	int totalAsteroids = countVisibleAsteroids(refSpace);
 	pair<int,int>* bestSpot = findBestStationLocation(refSpace);
 	printf("The best spot is at %i, %i\n", bestSpot->first, bestSpot->second);
-	meteor* vaporizationQueue = new meteor[totalAsteroids];
-	meteorsVaporizedSoFar = 0;
-	meteorsVaporizedThisPhase = 0;
+	meteor** vaporizationQueue = new meteor*[totalAsteroids];
+	int meteorsVaporizedSoFar = 0;
+	int meteorsVaporizedThisPhase = 0;
 	while(countVisibleAsteroids(refSpace) != 0)
 	{
-		//Find visible visible asteroids
-		//Add them to the array, and VAPORIZE them
+		hideInvisible(refSpace, bestSpot->second, bestSpot->first); //Find visible asteroids
+		meteorsVaporizedThisPhase = queueVaporizations(refSpace, vaporizationQueue, meteorsVaporizedSoFar); //Add them to the array, and VAPORIZE them
 		//Sort the newly added ones as a group.
 		//Restore the remaining invisible asteroids for the next round
 	}
-	
-	/*While there are still asteroids:
-		Find the ones that are visible
-		Sort them by angle into the vaporization queue
-		Remove them from the map
-	Pull the 200th in the queue for the answer. We could stop as soon as we had
-		 at least 200 meteors in the queue... but where's the fun of leaving meteors?
-	*/
 	
 	
 	delete bestSpot;
