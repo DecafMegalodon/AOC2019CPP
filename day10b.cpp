@@ -187,7 +187,7 @@ void restoreInvisibleAsteroids(char* space)
 //Queues all visible meteoroids for vaporization, and marks them as gone on the map
 //startpoint is how many meteors we've already vaporized
 //Returns how many were vaporized this phase
-int queueVaporizations(char* space, meteor* meteorList[], const int startPoint)
+int queueVaporizations(char* space, meteor* meteorList[], const int startPoint, const int observX, const int observY)
 {
 	int vaporized = 0;
 	int x;
@@ -200,12 +200,24 @@ int queueVaporizations(char* space, meteor* meteorList[], const int startPoint)
 			space[charNum] = '.';
 			x = charNum % SPACEWIDTH;
 			y = (charNum-x)/SPACEWIDTH;
-			angle = atan((double) y/x);
+			angle = atan((double) (observY-y)/(observX-x));
+			angle = fmod(2.5*M_PI-angle,2*M_PI-.000001); //.000001 is our fudge factor for floating point error
 			meteorList[startPoint+vaporized] = new meteor(x, y, angle);
 			vaporized++;
 		}
 	}
 	return vaporized;
+}
+
+void dumpVaporization(meteor** queue, int numMeteorites)
+{
+	meteor* curObj;
+	for(int i = 0; i < numMeteorites; i++)
+	{
+		curObj = queue[i];
+		printf("[%i] %i, %i, %f\n", i, curObj->x, curObj->y, curObj->angle);
+	}
+	
 }
 
 
@@ -223,15 +235,16 @@ int main()
 	{
 		printSpace(refSpace);
 		hideInvisible(refSpace, bestSpot->second, bestSpot->first); //Find visible asteroids
-		meteorsVaporizedThisPhase = queueVaporizations(refSpace, vaporizationQueue, meteorsVaporizedSoFar); //Add them to the array, and VAPORIZE them
+		meteorsVaporizedThisPhase = queueVaporizations(refSpace, vaporizationQueue, meteorsVaporizedSoFar,
+										bestSpot->first, bestSpot->second); //Add them to the array, and VAPORIZE them
 		std::sort(&vaporizationQueue[meteorsVaporizedSoFar], &vaporizationQueue[meteorsVaporizedSoFar+meteorsVaporizedThisPhase]); //Sort the meteoroids from this phase
 		meteorsVaporizedSoFar += meteorsVaporizedThisPhase;
 		restoreInvisibleAsteroids(refSpace);
 		cout << meteorsVaporizedThisPhase << " vaporized!\n";
 	}
 	
+	dumpVaporization(vaporizationQueue, totalAsteroids);
+	printf("The 200th was at %i, %i\n", vaporizationQueue[199]->x, vaporizationQueue[199]->y);
 	
-	delete bestSpot;
-	delete refSpace;
 	return 0;
 }

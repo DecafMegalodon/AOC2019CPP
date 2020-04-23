@@ -129,7 +129,6 @@ int main()
 	int mostAsteroidsVisibleSoFar = -1;
 	int visibleHere;
 	readSpace(refSpace);
-	//printSpace(refSpace);
 	for(int y=0; y<SPACEHEIGHT; y++)
 	{
 		for(int x = 0; x < SPACEWIDTH; x++)
