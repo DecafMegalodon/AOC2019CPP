@@ -7,8 +7,8 @@
 
 using namespace std;
 
-const int SPACEWIDTH = 17;
-const int SPACEHEIGHT = 5; //Hmm, I could have sworn there were three (or more) dimensions in space.
+const int SPACEWIDTH = 21;
+const int SPACEHEIGHT = 21; //Hmm, I could have sworn there were three (or more) dimensions in space.
 
 //Technically, these are meteroids according to the "lore" of the challenge
 struct meteor
@@ -70,12 +70,12 @@ void readSpace(char* space)
 {
 	for(int line = 0; line < SPACEHEIGHT; line++)
 	{
-		scanf("%17c\n", &space[line*SPACEWIDTH]);
+		scanf("%21c\n", &space[line*SPACEWIDTH]);
 	}
 }
 
 //Checks a spot in space and returns what's there. Returns \0 if it's out of bounds
-char readSpot(const char* space, const int y, const int x)
+char readSpot(const char* space, const int x, const int y)
 {
 	if(y>=0 && y<SPACEHEIGHT && x>=0 && x<SPACEWIDTH)
 		return space[y*SPACEWIDTH+x];
@@ -85,7 +85,7 @@ char readSpot(const char* space, const int y, const int x)
 
 //Hides a meteor at the given y,x coordinate. If there's no meteorite, it does nothing.
 //Returns false if outside of bounds and does nothing.
-bool hideSpot(char* space, const int y, const int x)
+bool hideSpot(char* space, const int x, const int y)
 {
 	if(y>=0 && y<SPACEHEIGHT && x>=0 && x<SPACEWIDTH)
 	{
@@ -107,7 +107,7 @@ bool isPrime(int num)
 }
 
 //Alters the space map. Replaces invisible asteroids (#) from y,x's vantage point with +
-void hideInvisible(char* space, const int y, const int x)
+void hideInvisible(char* space, const int x, const int y)
 {
 	char curChar;
 	int deltaX;
@@ -120,7 +120,7 @@ void hideInvisible(char* space, const int y, const int x)
 		{
 			if(curX == x && curY == y)
 				continue; //Our origin asteroid doesn't occlude others
-			curChar = readSpot(space,curY,curX);
+			curChar = readSpot(space,curX,curY);
 			if(curChar == '#') //Are we checking an asteroid?
 			{
 				deltaX = curX-x;
@@ -129,7 +129,7 @@ void hideInvisible(char* space, const int y, const int x)
 				deltaY /= gcd;
 				deltaX /= gcd;
 				multiplier = 1;
-				while(hideSpot(space, curY+(deltaY*multiplier), curX+(deltaX*multiplier)))
+				while(hideSpot(space, curX+(deltaX*multiplier), curY+(deltaY*multiplier)))
 					multiplier++;
 				
 			}
@@ -162,7 +162,7 @@ pair<int,int>* findBestStationLocation(const char* space)
 			if(readSpot(space,y,x) == '#') //Observatories can only go on asteroids
 			{
 				cloneSpace(space, workingSpace);
-				hideInvisible(workingSpace, y, x);
+				hideInvisible(workingSpace, x, y);
 				visibleHere = countVisibleAsteroids(workingSpace);
 				if(visibleHere > mostAsteroidsVisibleSoFar)
 				{
