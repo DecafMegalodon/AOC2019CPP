@@ -7,8 +7,8 @@
 
 using namespace std;
 
-const int SPACEWIDTH = 21;
-const int SPACEHEIGHT = 21; //Hmm, I could have sworn there were three (or more) dimensions in space.
+const int SPACEWIDTH = 17;
+const int SPACEHEIGHT = 5; //Hmm, I could have sworn there were three (or more) dimensions in space.
 
 //Technically, these are meteroids according to the "lore" of the challenge
 struct meteor
@@ -24,9 +24,14 @@ struct meteor
 		angle=ang;
 	}
 	
-	bool operator<(const meteor* meteor2)
+	meteor()
 	{
-		return angle < meteor2->angle;
+		
+	}
+	
+	bool operator<(const meteor meteor2)
+	{
+		return angle < meteor2.angle;
 	}
 	
 };
@@ -65,7 +70,7 @@ void readSpace(char* space)
 {
 	for(int line = 0; line < SPACEHEIGHT; line++)
 	{
-		scanf("%21c\n", &space[line*SPACEWIDTH]);
+		scanf("%17c\n", &space[line*SPACEWIDTH]);
 	}
 }
 
@@ -187,7 +192,7 @@ void restoreInvisibleAsteroids(char* space)
 //Queues all visible meteoroids for vaporization, and marks them as gone on the map
 //startpoint is how many meteors we've already vaporized
 //Returns how many were vaporized this phase
-int queueVaporizations(char* space, meteor* meteorList[], const int startPoint, const int observX, const int observY)
+int queueVaporizations(char* space, meteor meteorList[], const int startPoint, const int observX, const int observY)
 {
 	int vaporized = 0;
 	int x;
@@ -202,20 +207,20 @@ int queueVaporizations(char* space, meteor* meteorList[], const int startPoint, 
 			y = (charNum-x)/SPACEWIDTH;
 			angle = atan((double) (observY-y)/(observX-x));
 			angle = fmod(2.5*M_PI-angle,2*M_PI-.000001); //.000001 is our fudge factor for floating point error
-			meteorList[startPoint+vaporized] = new meteor(x, y, angle);
+			meteorList[startPoint+vaporized] = meteor(x, y, angle);
 			vaporized++;
 		}
 	}
 	return vaporized;
 }
 
-void dumpVaporization(meteor** queue, int numMeteorites)
+void dumpVaporization(meteor queue[], int numMeteorites)
 {
-	meteor* curObj;
+	meteor curObj;
 	for(int i = 0; i < numMeteorites; i++)
 	{
 		curObj = queue[i];
-		printf("[%i] %i, %i, %f\n", i, curObj->x, curObj->y, curObj->angle);
+		printf("[%i] %i, %i, %f\n", i, curObj.x, curObj.y, curObj.angle);
 	}
 	
 }
@@ -225,10 +230,11 @@ int main()
 {
 	char* refSpace = new char[SPACEHEIGHT*SPACEWIDTH];
 	readSpace(refSpace);
-	int totalAsteroids = countVisibleAsteroids(refSpace);
+	int totalAsteroids = countVisibleAsteroids(refSpace)-1; //Don't include the one we're on.
 	pair<int,int>* bestSpot = findBestStationLocation(refSpace);
+	refSpace[bestSpot->second * SPACEWIDTH + bestSpot->first] = '%'; //You are here
 	printf("The best spot is at %i, %i\n", bestSpot->first, bestSpot->second);
-	meteor** vaporizationQueue = new meteor*[totalAsteroids];
+	meteor* vaporizationQueue = new meteor[totalAsteroids];
 	int meteorsVaporizedSoFar = 0;
 	int meteorsVaporizedThisPhase;
 	while(countVisibleAsteroids(refSpace) != 0)
@@ -243,8 +249,9 @@ int main()
 		cout << meteorsVaporizedThisPhase << " vaporized!\n";
 	}
 	
+	//std::sort(vaporizationQueue,vaporizationQueue+totalAsteroids);
 	dumpVaporization(vaporizationQueue, totalAsteroids);
-	printf("The 200th was at %i, %i\n", vaporizationQueue[199]->x, vaporizationQueue[199]->y);
+	printf("The 200th was at %i, %i\n", vaporizationQueue[199].x, vaporizationQueue[199].y);
 	
 	return 0;
 }
