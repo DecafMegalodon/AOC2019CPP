@@ -7,8 +7,8 @@
 
 using namespace std;
 
-const int SPACEWIDTH = 21;
-const int SPACEHEIGHT = 21; //Hmm, I could have sworn there were three (or more) dimensions in space.
+const int SPACEWIDTH = 20;
+const int SPACEHEIGHT = 20; //Hmm, I could have sworn there were three (or more) dimensions in space.
 
 //Technically, these are meteroids according to the "lore" of the challenge
 struct meteor
@@ -35,6 +35,18 @@ struct meteor
 	}
 	
 };
+
+double calcAngle(int x, int y)
+{
+	if(x == 0)
+		return y > 0 ? 0 : M_PI;
+	else
+	{
+		double protoAngle = atan(y/x);
+		double angle = fmod(2.5*M_PI-protoAngle,2*M_PI);
+		return angle;
+	}
+}
 
 //Computes the Greatest Common Demoninator of the two numbers.
 int GCD(int a, int b)
@@ -70,7 +82,7 @@ void readSpace(char* space)
 {
 	for(int line = 0; line < SPACEHEIGHT; line++)
 	{
-		scanf("%21c\n", &space[line*SPACEWIDTH]);
+		scanf("%20c\n", &space[line*SPACEWIDTH]);
 	}
 }
 
@@ -145,7 +157,7 @@ int countVisibleAsteroids(const char* space)
 	for(int charNum = 0; charNum < SPACEHEIGHT*SPACEWIDTH; charNum++)
 		if(space[charNum] == '#')
 			count++;
-	return count - 1;
+	return count - 1; //Don't include the observatory
 }
 
 //returns an x,y pair with the location of the best (most visible asteroids) observatory
@@ -159,7 +171,7 @@ pair<int,int>* findBestStationLocation(const char* space)
 	{
 		for(int x = 0; x < SPACEWIDTH; x++)
 		{
-			if(readSpot(space,y,x) == '#') //Observatories can only go on asteroids
+			if(readSpot(space,x,y) == '#') //Observatories can only go on asteroids
 			{
 				cloneSpace(space, workingSpace);
 				hideInvisible(workingSpace, x, y);
@@ -205,9 +217,7 @@ int queueVaporizations(char* space, meteor meteorList[], const int startPoint, c
 			space[charNum] = '.';
 			x = charNum % SPACEWIDTH;
 			y = (charNum-x)/SPACEWIDTH;
-			angle = atan((double) (observY-y)/(observX-x));
-			angle = fmod(2.5*M_PI-angle,2*M_PI-.000001); //.000001 is our fudge factor for floating point error
-			meteorList[startPoint+vaporized] = meteor(x, y, angle);
+			meteorList[startPoint+vaporized] = meteor(x, y, calcAngle(observX-x,observY-y));
 			vaporized++;
 		}
 	}
@@ -230,7 +240,7 @@ int main()
 {
 	char* refSpace = new char[SPACEHEIGHT*SPACEWIDTH];
 	readSpace(refSpace);
-	int totalAsteroids = countVisibleAsteroids(refSpace)-1; //Don't include the one we're on.
+	int totalAsteroids = countVisibleAsteroids(refSpace);
 	pair<int,int>* bestSpot = findBestStationLocation(refSpace);
 	refSpace[bestSpot->second * SPACEWIDTH + bestSpot->first] = '%'; //You are here
 	printf("The best spot is at %i, %i\n", bestSpot->first, bestSpot->second);
@@ -239,7 +249,7 @@ int main()
 	int meteorsVaporizedThisPhase;
 	while(countVisibleAsteroids(refSpace) != 0)
 	{
-		printSpace(refSpace);
+		//printSpace(refSpace);
 		hideInvisible(refSpace, bestSpot->second, bestSpot->first); //Find visible asteroids
 		meteorsVaporizedThisPhase = queueVaporizations(refSpace, vaporizationQueue, meteorsVaporizedSoFar,
 										bestSpot->first, bestSpot->second); //Add them to the array, and VAPORIZE them
