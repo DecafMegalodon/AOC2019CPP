@@ -242,15 +242,15 @@ int main()
 	readSpace(refSpace);
 	int totalAsteroids = countVisibleAsteroids(refSpace);
 	pair<int,int>* bestSpot = findBestStationLocation(refSpace);
-	refSpace[bestSpot->second * SPACEWIDTH + bestSpot->first] = '%'; //You are here
+	refSpace[bestSpot->second*SPACEWIDTH + bestSpot->first] = '@'; //You are here
 	printf("The best spot is at %i, %i\n", bestSpot->first, bestSpot->second);
 	meteor* vaporizationQueue = new meteor[totalAsteroids];
 	int meteorsVaporizedSoFar = 0;
 	int meteorsVaporizedThisPhase;
 	while(countVisibleAsteroids(refSpace) != 0)
 	{
-		//printSpace(refSpace);
-		hideInvisible(refSpace, bestSpot->second, bestSpot->first); //Find visible asteroids
+		printSpace(refSpace);
+		hideInvisible(refSpace, bestSpot->first, bestSpot->second); //Find visible asteroids
 		meteorsVaporizedThisPhase = queueVaporizations(refSpace, vaporizationQueue, meteorsVaporizedSoFar,
 										bestSpot->first, bestSpot->second); //Add them to the array, and VAPORIZE them
 		std::sort(&vaporizationQueue[meteorsVaporizedSoFar], &vaporizationQueue[meteorsVaporizedSoFar+meteorsVaporizedThisPhase]); //Sort the meteoroids from this phase
@@ -259,7 +259,6 @@ int main()
 		cout << meteorsVaporizedThisPhase << " vaporized!\n";
 	}
 	
-	//std::sort(vaporizationQueue,vaporizationQueue+totalAsteroids);
 	dumpVaporization(vaporizationQueue, totalAsteroids);
 	printf("The 200th was at %i, %i\n", vaporizationQueue[199].x, vaporizationQueue[199].y);
 	
