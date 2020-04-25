@@ -7,8 +7,9 @@
 
 using namespace std;
 
-const int SPACEWIDTH = 20;
-const int SPACEHEIGHT = 20; //Hmm, I could have sworn there were three (or more) dimensions in space.
+const int SPACEWIDTH = 21;
+const int SPACEHEIGHT = 21; //Hmm, I could have sworn there were three (or more) dimensions in space.
+
 
 //Technically, these are meteroids according to the "lore" of the challenge
 struct meteor
@@ -38,14 +39,10 @@ struct meteor
 
 double calcAngle(int x, int y)
 {
-	if(x == 0)
-		return y > 0 ? 0 : M_PI;
-	else
-	{
-		double protoAngle = atan(y/x);
-		double angle = fmod(2.5*M_PI-protoAngle,2*M_PI);
-		return angle;
-	}
+	double protoangle = atan2(x,y);
+	double angle = fmod(protoangle+2*M_PI, 2*M_PI);
+	printf("calcAngle(%i,%i) = %f\n", x, y, angle);
+	return angle;
 }
 
 //Computes the Greatest Common Demoninator of the two numbers.
@@ -82,7 +79,7 @@ void readSpace(char* space)
 {
 	for(int line = 0; line < SPACEHEIGHT; line++)
 	{
-		scanf("%20c\n", &space[line*SPACEWIDTH]);
+		scanf("%21c\n", &space[line*SPACEWIDTH]);
 	}
 }
 
@@ -150,21 +147,19 @@ void hideInvisible(char* space, const int x, const int y)
 }
 
 //Counts the asteroids that are still visible.
-//Assumes one of them is the observatory, which isn't counted
 int countVisibleAsteroids(const char* space)
 {
 	int count=0;
 	for(int charNum = 0; charNum < SPACEHEIGHT*SPACEWIDTH; charNum++)
 		if(space[charNum] == '#')
 			count++;
-	return count - 1; //Don't include the observatory
+	return count; //This include the observatory asteroid
 }
 
 //returns an x,y pair with the location of the best (most visible asteroids) observatory
-pair<int,int>* findBestStationLocation(const char* space)
+void findBestStationLocation(const char* space, int* bestX, int* bestY)
 {
 	char* workingSpace = new char[SPACEHEIGHT*SPACEWIDTH];
-	pair<int,int>* best  = new pair<int,int>;
 	int mostAsteroidsVisibleSoFar = -1;
 	int visibleHere;
 	for(int y=0; y<SPACEHEIGHT; y++)
@@ -179,8 +174,8 @@ pair<int,int>* findBestStationLocation(const char* space)
 				if(visibleHere > mostAsteroidsVisibleSoFar)
 				{
 					mostAsteroidsVisibleSoFar = visibleHere;
-					best->first=x;
-					best->second=y;
+					*bestX=x;
+					*bestY=y;
 				}
 				mostAsteroidsVisibleSoFar = max(mostAsteroidsVisibleSoFar, visibleHere);
 			}
@@ -188,7 +183,6 @@ pair<int,int>* findBestStationLocation(const char* space)
 	}
 	delete workingSpace;
 	cout << mostAsteroidsVisibleSoFar << endl;
-	return best;
 }
 
 //Restores hidden asteroids ('+') to normal ('#')
@@ -217,7 +211,7 @@ int queueVaporizations(char* space, meteor meteorList[], const int startPoint, c
 			space[charNum] = '.';
 			x = charNum % SPACEWIDTH;
 			y = (charNum-x)/SPACEWIDTH;
-			meteorList[startPoint+vaporized] = meteor(x, y, calcAngle(observX-x,observY-y));
+			meteorList[startPoint+vaporized] = meteor(x, y, calcAngle(x-observX,observY-y));
 			vaporized++;
 		}
 	}
@@ -240,27 +234,28 @@ int main()
 {
 	char* refSpace = new char[SPACEHEIGHT*SPACEWIDTH];
 	readSpace(refSpace);
-	int totalAsteroids = countVisibleAsteroids(refSpace);
-	pair<int,int>* bestSpot = findBestStationLocation(refSpace);
-	refSpace[bestSpot->second*SPACEWIDTH + bestSpot->first] = '@'; //You are here
-	printf("The best spot is at %i, %i\n", bestSpot->first, bestSpot->second);
-	meteor* vaporizationQueue = new meteor[totalAsteroids];
+	int totalAsteroids = countVisibleAsteroids(refSpace)-1; //Don't include observatory
+	int bestX;
+	int bestY;
+	findBestStationLocation(refSpace, &bestX, &bestY);
+	refSpace[bestY*SPACEWIDTH + bestX] = '@'; //You are here
+	printf("The best spot is at %i, %i\n", bestX, bestY);
+	meteor* vaporizationQueue = new meteor[totalAsteroids-1];
 	int meteorsVaporizedSoFar = 0;
 	int meteorsVaporizedThisPhase;
 	while(countVisibleAsteroids(refSpace) != 0)
 	{
 		printSpace(refSpace);
-		hideInvisible(refSpace, bestSpot->first, bestSpot->second); //Find visible asteroids
+		hideInvisible(refSpace, bestX, bestY); //Find visible asteroids
 		meteorsVaporizedThisPhase = queueVaporizations(refSpace, vaporizationQueue, meteorsVaporizedSoFar,
-										bestSpot->first, bestSpot->second); //Add them to the array, and VAPORIZE them
+										bestX, bestY); //Add them to the array, and VAPORIZE them
 		std::sort(&vaporizationQueue[meteorsVaporizedSoFar], &vaporizationQueue[meteorsVaporizedSoFar+meteorsVaporizedThisPhase]); //Sort the meteoroids from this phase
 		meteorsVaporizedSoFar += meteorsVaporizedThisPhase;
 		restoreInvisibleAsteroids(refSpace);
-		cout << meteorsVaporizedThisPhase << " vaporized!\n";
+		cout << meteorsVaporizedThisPhase << " vaporized! " << countVisibleAsteroids(refSpace) << " to go!\n";
 	}
 	
 	dumpVaporization(vaporizationQueue, totalAsteroids);
 	printf("The 200th was at %i, %i\n", vaporizationQueue[199].x, vaporizationQueue[199].y);
-	
 	return 0;
 }
