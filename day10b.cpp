@@ -40,9 +40,7 @@ struct meteor
 double calcAngle(int x, int y)
 {
 	double protoangle = atan2(x,y);
-	double angle = fmod(protoangle+2*M_PI, 2*M_PI);
-	printf("calcAngle(%i,%i) = %f\n", x, y, angle);
-	return angle;
+	return fmod(protoangle+2*M_PI, 2*M_PI);
 }
 
 //Computes the Greatest Common Demoninator of the two numbers.
@@ -182,7 +180,7 @@ void findBestStationLocation(const char* space, int* bestX, int* bestY)
 		}
 	}
 	delete workingSpace;
-	cout << mostAsteroidsVisibleSoFar << endl;
+	cout << "At the ideal spot, there are this many visible: "<< mostAsteroidsVisibleSoFar-1 << endl;
 }
 
 //Restores hidden asteroids ('+') to normal ('#')
@@ -239,23 +237,20 @@ int main()
 	int bestY;
 	findBestStationLocation(refSpace, &bestX, &bestY);
 	refSpace[bestY*SPACEWIDTH + bestX] = '@'; //You are here
-	printf("The best spot is at %i, %i\n", bestX, bestY);
+	printf("The best spot is at %i, %i.\n", bestX, bestY);
 	meteor* vaporizationQueue = new meteor[totalAsteroids-1];
 	int meteorsVaporizedSoFar = 0;
 	int meteorsVaporizedThisPhase;
 	while(countVisibleAsteroids(refSpace) != 0)
 	{
-		printSpace(refSpace);
 		hideInvisible(refSpace, bestX, bestY); //Find visible asteroids
 		meteorsVaporizedThisPhase = queueVaporizations(refSpace, vaporizationQueue, meteorsVaporizedSoFar,
 										bestX, bestY); //Add them to the array, and VAPORIZE them
 		std::sort(&vaporizationQueue[meteorsVaporizedSoFar], &vaporizationQueue[meteorsVaporizedSoFar+meteorsVaporizedThisPhase]); //Sort the meteoroids from this phase
 		meteorsVaporizedSoFar += meteorsVaporizedThisPhase;
 		restoreInvisibleAsteroids(refSpace);
-		cout << meteorsVaporizedThisPhase << " vaporized! " << countVisibleAsteroids(refSpace) << " to go!\n";
 	}
-	
-	dumpVaporization(vaporizationQueue, totalAsteroids);
 	printf("The 200th was at %i, %i\n", vaporizationQueue[199].x, vaporizationQueue[199].y);
+	printf("The answer is %i\n", vaporizationQueue[199].x*100 + vaporizationQueue[199].y);	
 	return 0;
 }
