@@ -85,7 +85,7 @@ int main()
 			intCodeInterpreter(memory);
 			if(memory[0] == TARGETOUTPUT)
 			{
-				printf("Answer = %d\n", 100*noun + verb);
+				printf("%d\n", 100*noun + verb);
 				return 0;
 			}
 			copyMemory(memoryBackup, memory);

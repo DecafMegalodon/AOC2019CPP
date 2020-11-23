@@ -64,5 +64,5 @@ int main()
 	int memory[MEMSIZE];
 	initializeMemory(memory);
 	intCodeInterpreter(memory);
-	printf("Memory[0] = %d\n", memory[0]);
+	printf("%d\n", memory[0]);
 }

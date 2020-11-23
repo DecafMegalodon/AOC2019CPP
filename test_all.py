@@ -10,7 +10,7 @@ testsSlow = 0
 results = [line.strip() for line in fileinput.input(files=("inputs/results.txt"))]
 
 
-for day in range(1,1+1):
+for day in range(1,2+1):
     paddedDay = ('0' if day < 10 
                 else '') + str(day)
     dayInput = open("inputs/day" + paddedDay + ".txt")
