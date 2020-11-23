@@ -2,6 +2,7 @@
 import fileinput
 import subprocess
 import time
+import os
 
 testsPassed = 0
 testsFailed = 0
@@ -16,10 +17,13 @@ for day in range(1,1+1):
     for part in ('a', 'b'):
         if day == 25 and part == 'b': #  No part b on on 25th
             break
-        progName = ''.join(['day', paddedDay, part, '.py'])
+        progName = ''.join(['day', paddedDay, part, '.cpp'])
+        
+        #compile
+        os.system("g++ -O3 %s -o testCompiled" % progName)
         
         startTime = time.time()
-        subProc = subprocess.run(args=["python3", progName],
+        subProc = subprocess.run(args=["./testCompiled"],
                                 stdin=dayInput, capture_output=True)
         stopTime = time.time()
         timeTaken = round(stopTime - startTime, 4)
