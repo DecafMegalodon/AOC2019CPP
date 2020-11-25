@@ -24,33 +24,38 @@ for day in range(1,3+1):
                                 stdin=dayInput, capture_output=True)
                                 
         compilationSuccessful = (compProcess.returncode == 0)
-        #print(compProcess.stdout)
         
-        
-        
-        startTime = time.time()
-        subProc = subprocess.run(args=["./testCompiled"],
-                                stdin=dayInput, capture_output=True)
-        stopTime = time.time()
-        timeTaken = round(stopTime - startTime, 4)
-        
-        output = str(subProc.stdout.decode('utf-8')).strip()
-        expected = results[(day*2) + (-2 if part == 'a' else -1)]
-        testCorrect = (output == expected)
-        
-        result = "OK" if testCorrect else "FAIL"
-        if testCorrect and timeTaken > 15:
-            result = "SLOW"
+        if compilationSuccessful:
+            startTime = time.time()
+            subProc = subprocess.run(args=["./testCompiled"],
+                                    stdin=dayInput, capture_output=True)
+            stopTime = time.time()
+            timeTaken = round(stopTime - startTime, 4)
             
-        print("D" + paddedDay + part, result, timeTaken, "seconds")
+            output = str(subProc.stdout.decode('utf-8')).strip()
+            expected = results[(day*2) + (-2 if part == 'a' else -1)]
+            testCorrect = (output == expected)
+            
+            result = "OK" if testCorrect else "FAIL"
+            if testCorrect and timeTaken > 15:
+                result = "SLOW"
+            print("D" + paddedDay + part, result, timeTaken, "seconds")
+            
+            if testCorrect:
+                testsPassed += 1
+            else:
+                testsFailed += 1
 
-        if testCorrect:
-            testsPassed += 1
+            if timeTaken >= 15:
+                testsSlow += 1
+
         else:
             testsFailed += 1
+            print("D" + paddedDay + part + " Compilation failed")
+            print(compProcess.stderr.decode('utf-8'))
+            print()
+        
 
-        if timeTaken >= 15:
-            testsSlow += 1
 
         dayInput.seek(0,0)
 
