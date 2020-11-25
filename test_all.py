@@ -51,9 +51,10 @@ for day in range(1,3+1):
 
         else:
             testsFailed += 1
+            print("----------------------------------------")
             print("D" + paddedDay + part + " Compilation failed")
             print(compProcess.stderr.decode('utf-8'))
-            print()
+            print("----------------------------------------")
         
 
 
