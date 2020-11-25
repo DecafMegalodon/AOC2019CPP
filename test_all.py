@@ -10,7 +10,7 @@ testsSlow = 0
 results = [line.strip() for line in fileinput.input(files=("inputs/results.txt"))]
 
 
-for day in range(1,2+1):
+for day in range(1,3+1):
     paddedDay = ('0' if day < 10 
                 else '') + str(day)
     dayInput = open("inputs/day" + paddedDay + ".txt")
@@ -20,7 +20,13 @@ for day in range(1,2+1):
         progName = ''.join(['day', paddedDay, part, '.cpp'])
         
         #compile
-        os.system("g++ -O3 %s -o testCompiled" % progName)
+        compProcess = subprocess.run(args=["g++", progName, '-O3', '-o',  'testCompiled'],
+                                stdin=dayInput, capture_output=True)
+                                
+        compilationSuccessful = (compProcess.returncode == 0)
+        #print(compProcess.stdout)
+        
+        
         
         startTime = time.time()
         subProc = subprocess.run(args=["./testCompiled"],
