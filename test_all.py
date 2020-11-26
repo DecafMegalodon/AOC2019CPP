@@ -45,14 +45,18 @@ for day in range(1,3+1):
                 testsPassed += 1
             else:
                 testsFailed += 1
+                print("----------------------------------------")
+                print("Expected: %s, got:" % expected)
+                print(output)
+                print("----------------------------------------")
 
             if timeTaken >= 15:
                 testsSlow += 1
 
-        else:
+        else: #  Compilation not successful
             testsFailed += 1
-            print("----------------------------------------")
             print("D" + paddedDay + part + " Compilation failed")
+            print("----------------------------------------")
             print(compProcess.stderr.decode('utf-8'))
             print("----------------------------------------")
         
