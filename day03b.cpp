@@ -29,7 +29,7 @@ void initWireboard(WireRow* wireboard)
 	// cout << "\n";
 // }
 
-void readWire(WireRow* wireboard, int wirenum)
+void readWire(WireRow* wireboard, int wirenum, int* closest)
 {
 	char direction;
 	int distance;
@@ -80,10 +80,10 @@ void readWire(WireRow* wireboard, int wirenum)
 				if(wireboard[y][x] != 0) //If the wires cross
 				{
 					distanceFromOrigin = wireboard[y][x] + wireDistance;
-					if(distanceFromOrigin < mindistance)
+					if(distanceFromOrigin < *closest)
 					{
-						printf("Closer crossing at %d, %d! Distance from origin = %d\n", x, y, distanceFromOrigin);
-						mindistance = distanceFromOrigin;
+						//printf("Closer crossing at %d, %d! Distance from origin = %d\n", x, y, distanceFromOrigin);
+						*closest = distanceFromOrigin;
 					}
 
 				}
@@ -100,10 +100,11 @@ void readWire(WireRow* wireboard, int wirenum)
 
 int main()
 {
-	printf("Running (through all your RAM!)\n");
+	int closest = INT_MAX;
 	WireRow* wireboard = new WireRow [BOARDSIZE];
 	initWireboard(wireboard);
-	readWire(wireboard,1);
-	readWire(wireboard,2);
+	readWire(wireboard,1, &closest);
+	readWire(wireboard,2, &closest);
+	cout << closest;
 	return 0;
 }
