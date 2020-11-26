@@ -30,7 +30,6 @@ bool passwordIsValid(int a, int b, int c, int d, int e, int f)
 int main()
 {
 	int validPasswords = 0;
-	printf("Running\n");
 	for(int a=0; a<=9; a++)
 	{
 	for(int b=a; b<=9; b++)

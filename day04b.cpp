@@ -48,13 +48,12 @@ bool passwordIsValid(int a, int b, int c, int d, int e, int f)
 		// cout<<builtPassword<<"\n";
 	// else
 		// cout<<"REJECTED "<<builtPassword<<"\n";
-	// return passwordOK;
+	return passwordOK;
 }
 
 int main()
 {
 	int validPasswords = 0;
-	printf("Running\n");
 	
 	for(int a=0; a<=9; a++)
 	{
