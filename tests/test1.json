@@ -1,0 +1,9 @@
+{
+  "testIdentifier": "testName",
+  "compilationFiles": [
+    "file1.cpp",
+    "file2.cpp"
+  ],
+  "testInput": "filePath",
+  "testOutput": "filePath"
+}
