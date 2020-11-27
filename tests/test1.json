@@ -1,9 +1,8 @@
 {
-  "testIdentifier": "testName",
+  "testIdentifier": "testtest",
   "compilationFiles": [
-    "file1.cpp",
-    "file2.cpp"
+    "./tests/test.cpp"
   ],
-  "testInput": "filePath",
-  "testOutput": "filePath"
+  "testInput": "./tests/outputs/hello.txt",
+  "testOutput": "./tests/outputs/hello.txt"
 }
