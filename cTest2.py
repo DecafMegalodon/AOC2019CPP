@@ -45,14 +45,14 @@ def runSingleTest(testFilePath):
     except Exception as e:
         print(BIG_LINE)
         print(testFilePath, test['testIdentifier'])        
-        print(Fore.RED, f'There was a problem with this test configuration. The reason given was: {e}', Style.RESET_ALL)
+        print(Fore.RED, f'[ERROR] There was a problem with this test configuration. The reason given was: {e}', Style.RESET_ALL)
         print(BIG_LINE)
         return -1
         
     if compilation_process.returncode != 0: #  compilation failed
         print(BIG_LINE)
         print(testFilePath, test['testIdentifier'])        
-        print(Fore.RED, 'This test did not successfully compile. The given message was:', Style.RESET_ALL)
+        print(Fore.RED, '[FAIL] This test did not successfully compile. The given message was:', Style.RESET_ALL)
         print(compilation_process.stderr.decode('utf-8'))
         print(BIG_LINE)
         return -1
@@ -63,13 +63,13 @@ def runSingleTest(testFilePath):
     test_output = test_execution_process.stdout.decode('utf-8').strip()
     
     if test_output == expected_output:
-        print(testFilePath, test['testIdentifier'], Fore.GREEN, '[PASS]', Style.RESET_ALL)
+        print(Fore.GREEN, '[PASS]', Style.RESET_ALL, testFilePath, test['testIdentifier'])
         return 0
     else:
         print(BIG_LINE)
         print(testFilePath, test['testIdentifier'])        
         print(SMALL_LINE)
-        print(Fore.RED, 'The program did not produce the expected output', Style.RESET_ALL)
+        print(Fore.RED, '[FAIL] The program did not produce the expected output', Style.RESET_ALL)
         print("Expected:\n", expected_output)
         print(SMALL_LINE)
         print("Got:\n", test_output)

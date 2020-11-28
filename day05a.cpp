@@ -164,10 +164,11 @@ void intCodeInterpreter(int* memory)
 								opcode->paramModes[2]);
 				break;
 			case PRMPT: //Prompt for an integer input. We're not going to try to catch bad input in this scenario.
-				cout << "Please enter a number\n";
-				int input;
-				scanf("%d",&input);
-				writeMem(memory, input, opcode->parameters[0], opcode->paramModes[0]);
+				// cout << "Please enter a number\n";
+				// int input;
+				// scanf("%d",&input);
+				//int input = 1;
+				writeMem(memory, 1, opcode->parameters[0], opcode->paramModes[0]);
 				break;
 			case PRNT: //Print a number from the system
 				cout << readMem(memory, opcode->parameters[0], opcode->paramModes[0]) << "\n";

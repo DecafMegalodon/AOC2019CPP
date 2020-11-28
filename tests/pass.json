@@ -1,8 +1,0 @@
-{
-  "testIdentifier": "testtest",
-  "compilationFiles": [
-    "./tests/test.cpp"
-  ],
-  "testInput": "./tests/outputs/hello.txt",
-  "testOutput": "./tests/outputs/hello.txt"
-}
