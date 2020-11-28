@@ -1,0 +1,8 @@
+{
+  "testIdentifier": "AOC 2019 Day 01a",
+  "compilationFiles": [
+    "./day01a.cpp"
+  ],
+  "testInput": "./inputs/day01.txt",
+  "testOutput": "./tests/outputs/day01a.txt"
+}

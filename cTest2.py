@@ -39,7 +39,7 @@ def runSingleTest(testFilePath):
         compilation_process = subprocess.run(build_opts, capture_output=True)
         
         test_output_file = open(test['testOutput'])
-        expected_output = test_output_file.read()
+        expected_output = test_output_file.read().strip()
         test_output_file.close()
         
     except Exception as e:
@@ -60,7 +60,7 @@ def runSingleTest(testFilePath):
     test_execution_process = subprocess.run('./testCompiled', stdin=test_input_file, capture_output=True)
     test_input_file.close()
     
-    test_output = test_execution_process.stdout.decode('utf-8')
+    test_output = test_execution_process.stdout.decode('utf-8').strip()
     
     if test_output == expected_output:
         print(testFilePath, test['testIdentifier'], Fore.GREEN, '[PASS]', Style.RESET_ALL)
@@ -68,6 +68,7 @@ def runSingleTest(testFilePath):
     else:
         print(BIG_LINE)
         print(testFilePath, test['testIdentifier'])        
+        print(SMALL_LINE)
         print(Fore.RED, 'The program did not produce the expected output', Style.RESET_ALL)
         print("Expected:\n", expected_output)
         print(SMALL_LINE)
