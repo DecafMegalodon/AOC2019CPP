@@ -1,0 +1,8 @@
+{
+  "testIdentifier": "Bound to fail",
+  "compilationFiles": [
+    "./tests/test.cpp"
+  ],
+  "testInput": "./tests/outputs/hello.txt",
+  "testOutput": "./tests/outputs/goodbye.txt"
+}

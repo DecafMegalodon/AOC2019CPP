@@ -32,9 +32,6 @@ def runSingleTest(testFilePath):
     test_file.close()
     test = json.loads(test_JSON)
     
-    print(BIG_LINE)
-    print(testFilePath, test['testIdentifier'])
-    print(BIG_LINE)
     
     try:
         test_input_file = open(test['testInput'])
@@ -46,12 +43,18 @@ def runSingleTest(testFilePath):
         test_output_file.close()
         
     except Exception as e:
+        print(BIG_LINE)
+        print(testFilePath, test['testIdentifier'])        
         print(Fore.RED, f'There was a problem with this test configuration. The reason given was: {e}', Style.RESET_ALL)
+        print(BIG_LINE)
         return -1
         
     if compilation_process.returncode != 0: #  compilation failed
+        print(BIG_LINE)
+        print(testFilePath, test['testIdentifier'])        
         print(Fore.RED, 'This test did not successfully compile. The given message was:', Style.RESET_ALL)
         print(compilation_process.stderr.decode('utf-8'))
+        print(BIG_LINE)
         return -1
         
     test_execution_process = subprocess.run('./testCompiled', stdin=test_input_file, capture_output=True)
@@ -60,13 +63,16 @@ def runSingleTest(testFilePath):
     test_output = test_execution_process.stdout.decode('utf-8')
     
     if test_output == expected_output:
-        print(Fore.GREEN, '[PASS]', Style.RESET_ALL)
+        print(testFilePath, test['testIdentifier'], Fore.GREEN, '[PASS]', Style.RESET_ALL)
         return 0
     else:
+        print(BIG_LINE)
+        print(testFilePath, test['testIdentifier'])        
         print(Fore.RED, 'The program did not produce the expected output', Style.RESET_ALL)
         print("Expected:\n", expected_output)
         print(SMALL_LINE)
-        print("Got:\n", test_execution_process.stdout)
+        print("Got:\n", test_output)
+        print(BIG_LINE, '\n')
     
 
 def runTestsDir(directory):
@@ -76,7 +82,6 @@ def runTestsDir(directory):
             #  print(f"Recursively looking for tests in {fullPath}")
             runTestsDir(fullPath+'/')
         elif testDescriptor.endswith(".json"):
-            print()
             runSingleTest(fullPath)
         #  else ignore non-test files
             
