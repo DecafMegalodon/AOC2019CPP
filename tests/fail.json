@@ -1,8 +1,15 @@
 {
-  "testIdentifier": "Bound to fail",
+  "testIdentifier": "Intentional Fail",
   "compilationFiles": [
     "./tests/test.cpp"
   ],
-  "testInput": "./tests/outputs/hello.txt",
-  "testOutput": "./tests/outputs/goodbye.txt"
+  "tests": [
+	{
+		"testIdentifier": "Fail 01",
+		"testInputType": "file",
+		"testInput": "./tests/outputs/hello.txt",
+		"testOutputType": "file",
+		"testOutput": "./tests/outputs/goodbye.txt"
+	}
+  ]
 }

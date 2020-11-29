@@ -3,6 +3,13 @@
   "compilationFiles": [
     "./day03b.cpp"
   ],
-  "testInput": "./inputs/day03.txt",
-  "testOutput": "./tests/outputs/day03b.txt"
+  "tests": [
+	{
+		"testIdentifier": "Day 03b full",
+		"testInputType": "file",
+		"testInput": "./inputs/day03.txt",
+		"testOutputType": "file",
+		"testOutput": "./tests/outputs/day03b.txt"
+	}
+  ]
 }

@@ -49,7 +49,6 @@ def run_test_file(test_file_path):
     test_JSON = test_file.read()
     test_file.close()
     test = json.loads(test_JSON)
-    print(len(test['tests']))
     
     try:
         build_opts = ['g++', '-O3', '-o', 'testCompiled'] + test['compilationFiles']        
@@ -102,7 +101,7 @@ def run_test_file(test_file_path):
             print(test_file_path, test['testIdentifier'])        
             print(SMALL_LINE)
             print(Fore.RED, '[FAIL] The program did not produce the expected output', Style.RESET_ALL)
-            print("Expected:\n", expected_output)
+            print("Expected:\n", test_expected_output)
             print(SMALL_LINE)
             print("Got:\n", test_output)
         print(BIG_LINE, '\n')
