@@ -91,16 +91,16 @@ def run_test_file(test_file_path):
         test_execution_process = subprocess.run('./testCompiled', input=test_input, capture_output=True)
         test_output = test_execution_process.stdout.decode('utf-8').strip()
         
-        
+        full_test_name = f"{test_file_path}: {cur_test['testIdentifier']}"
         
         if test_output == test_expected_output:
-            print(Fore.GREEN, '[PASS]', Style.RESET_ALL, test_file_path, test['testIdentifier'])
+            print(Fore.GREEN, '[PASS]', Style.RESET_ALL, full_test_name)
             return 0
         else:
             print(BIG_LINE)
-            print(test_file_path, test['testIdentifier'])        
+            print(Fore.RED, '[FAIL]', Style.RESET_ALL, full_test_name)        
             print(SMALL_LINE)
-            print(Fore.RED, '[FAIL] The program did not produce the expected output', Style.RESET_ALL)
+            print(Fore.RED, 'The program did not produce the expected output', Style.RESET_ALL)
             print("Expected:\n", test_expected_output)
             print(SMALL_LINE)
             print("Got:\n", test_output)

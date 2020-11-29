@@ -1,5 +1,5 @@
 {
-  "testIdentifier": "Intentional Fail",
+  "testFamilyName": "Intentional Fail",
   "compilationFiles": [
     "./tests/test.cpp"
   ],
@@ -10,6 +10,13 @@
 		"testInput": "./tests/outputs/hello.txt",
 		"testOutputType": "file",
 		"testOutput": "./tests/outputs/goodbye.txt"
+	},
+	{
+		"testIdentifier": "Succeed 01",
+		"testInputType": "file",
+		"testInput": "./tests/outputs/hello.txt",
+		"testOutputType": "file",
+		"testOutput": "./tests/outputs/hello.txt"
 	}
   ]
 }
