@@ -19,13 +19,15 @@ in ./tests/:
           "testIdentifier": "testName",
           "testInput": "filePath",
           "testOutputType": "simple or file",
-          "testOutput": "filePath or value"
+          "testOutput": "filePath or value",
+          "testLevel": 0 (lower is a higher priority)
         },
         {
           "testIdentifier": "testName",
           "testInput": "filePath",
           "testOutputType": "simple or file",
-          "testOutput": "filePath or value"
+          "testOutput": "filePath or value",
+          "testLevel": 3
         },
         ...
       ]
@@ -39,30 +41,25 @@ from colorama import Fore, Back, Style
 SMALL_LINE = "--------------------"
 BIG_LINE = SMALL_LINE * 3
 
-#  Runs a single test. -1 for failures, 0 for successes
+#  Runs a single test file. Returns a tuple with (tests_passed, test_failed)
 def run_test_file(test_file_path):
+    tests_passed = 0
+    tests_failed = 0
     test_file = open(test_file_path, 'r')
     test_JSON = test_file.read()
     test_file.close()
     test = json.loads(test_JSON)
-    
+    print(len(test['tests']))
     
     try:
-        test_input_file = open(test['testInput'])
         build_opts = ['g++', '-O3', '-o', 'testCompiled'] + test['compilationFiles']        
-        compilation_process = subprocess.run(build_opts, capture_output=True)
-        
-        test_output_file = open(test['testOutput'])
-        expected_output = test_output_file.read().strip()
-        test_output_file.close()
-        
+        compilation_process = subprocess.run(build_opts, capture_output=True)      
     except Exception as e:
         print(BIG_LINE)
         print(test_file_path, test['testIdentifier'])        
         print(Fore.RED, f'[ERROR] There was a problem with this test configuration. The reason given was: {e}', Style.RESET_ALL)
         print(BIG_LINE)
-        return -1
-
+        return (0, len(test['tests'])) #  If the test itself it malformed, this may crash. TODO
 
     if compilation_process.returncode != 0: #  compilation failed
         print(BIG_LINE)
@@ -70,24 +67,44 @@ def run_test_file(test_file_path):
         print(Fore.RED, '[FAIL] This test did not successfully compile. The given message was:', Style.RESET_ALL)
         print(compilation_process.stderr.decode('utf-8'))
         print(BIG_LINE)
-        return -1
+        return (0, len(test['tests']))
         
-    test_execution_process = subprocess.run('./testCompiled', stdin=test_input_file, capture_output=True)
-    test_input_file.close()
-    
-    test_output = test_execution_process.stdout.decode('utf-8').strip()
-    
-    if test_output == expected_output:
-        print(Fore.GREEN, '[PASS]', Style.RESET_ALL, test_file_path, test['testIdentifier'])
-        return 0
-    else:
-        print(BIG_LINE)
-        print(test_file_path, test['testIdentifier'])        
-        print(SMALL_LINE)
-        print(Fore.RED, '[FAIL] The program did not produce the expected output', Style.RESET_ALL)
-        print("Expected:\n", expected_output)
-        print(SMALL_LINE)
-        print("Got:\n", test_output)
+    for cur_test in test['tests']:
+        #todo catch errors in individual tests
+        test_input_type = cur_test['testInputType']
+        test_output_type = cur_test['testOutputType']
+        test_input, test_expected_output = None, None
+        
+        if test_input_type == 'simple': #  Read input directly from the test file
+            test_input = cur_test['testInput']
+        else: #  hopefully 'file'
+            test_input_file = open(cur_test['testInput'], 'r')
+            test_input = test_input_file.read().encode()
+            test_input_file.close()
+
+        if test_output_type == 'simple':
+            test_expected_output = cur_test['testOutput']
+        else:
+            test_output_file = open(cur_test['testOutput'], 'r')
+            test_expected_output = test_output_file.read().strip()
+            test_output_file.close()
+        
+        test_execution_process = subprocess.run('./testCompiled', input=test_input, capture_output=True)
+        test_output = test_execution_process.stdout.decode('utf-8').strip()
+        
+        
+        
+        if test_output == test_expected_output:
+            print(Fore.GREEN, '[PASS]', Style.RESET_ALL, test_file_path, test['testIdentifier'])
+            return 0
+        else:
+            print(BIG_LINE)
+            print(test_file_path, test['testIdentifier'])        
+            print(SMALL_LINE)
+            print(Fore.RED, '[FAIL] The program did not produce the expected output', Style.RESET_ALL)
+            print("Expected:\n", expected_output)
+            print(SMALL_LINE)
+            print("Got:\n", test_output)
         print(BIG_LINE, '\n')
     
 
