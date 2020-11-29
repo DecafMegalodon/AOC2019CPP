@@ -1,7 +1,8 @@
 '''
+Copyright 2020 DecafMegalodon
+
 cTest2 is intended to be a tool to automate testing workflows for groups of
 simple programs that use I/O from standard in and out respectively.
-
 
 in ./tests/:
 	Will attempt to compile and run tests in .json files.
@@ -95,7 +96,7 @@ def run_test_file(test_file_path):
         
         if test_output == test_expected_output:
             print(Fore.GREEN, '[PASS]', Style.RESET_ALL, full_test_name)
-            return 0
+            tests_passed += 1
         else:
             print(BIG_LINE)
             print(Fore.RED, '[FAIL]', Style.RESET_ALL, full_test_name)        
@@ -104,7 +105,8 @@ def run_test_file(test_file_path):
             print("Expected:\n", test_expected_output)
             print(SMALL_LINE)
             print("Got:\n", test_output)
-        print(BIG_LINE, '\n')
+            tests_failed += 1
+            print(BIG_LINE, '\n')
     
 
 def run_tests_dir(directory):
