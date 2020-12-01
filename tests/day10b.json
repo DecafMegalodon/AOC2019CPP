@@ -1,0 +1,15 @@
+{
+  "testFamilyName": "AOC 2019 Day 10b",
+  "compilationFiles": [
+    "./day10a.cpp"
+  ],
+  "tests": [
+	{
+		"testIdentifier": "Day 10b full",
+		"testInputType": "file",
+		"testInput": "./tests/inputs/day10.txt",
+		"testOutputType": "simple",
+		"testOutput": "806"
+	}
+  ]
+}

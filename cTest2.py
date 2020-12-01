@@ -9,7 +9,7 @@ in ./tests/:
     File paths should be relative to PWD
     Files should be in JSON format with the following structure:
     {
-      "testFamilyName": "name. Optional if only one test",
+      "testFamilyName": "Name for this group of compiled files",
       "compilationFiles": [
         "file1.cpp",
         "file2.cpp",
@@ -63,7 +63,7 @@ def run_test_file(test_file_path):
 
     if compilation_process.returncode != 0: #  compilation failed
         print(BIG_LINE)
-        print(test_file_path, test['testIdentifier'])        
+        print(test_file_path, test['testFamilyName'])        
         print(Fore.RED, '[FAIL] This test did not successfully compile. The given message was:', Style.RESET_ALL)
         print(compilation_process.stderr.decode('utf-8'))
         print(BIG_LINE)
@@ -107,7 +107,8 @@ def run_test_file(test_file_path):
             print("Got:\n", test_output)
             tests_failed += 1
             print(BIG_LINE, '\n')
-    
+
+    return (tests_passed, tests_failed)
 
 def run_tests_dir(directory):
     for test_descriptor in os.listdir(directory):

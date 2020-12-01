@@ -1,5 +1,5 @@
 {
-  "testIdentifier": "AOC 2019 Day 02b",
+  "testFamilyName": "AOC 2019 Day 02b",
   "compilationFiles": [
     "./day02b.cpp"
   ],

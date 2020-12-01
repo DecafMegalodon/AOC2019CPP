@@ -1,5 +1,5 @@
 {
-  "testIdentifier": "AOC 2019 Day 01b",
+  "testFamilyName": "AOC 2019 Day 01b",
   "compilationFiles": [
     "./day01b.cpp"
   ],
@@ -8,8 +8,9 @@
 		"testIdentifier": "Day 01b full",
 		"testInputType": "file",
 		"testInput": "./inputs/day01.txt",
-		"testOutputType": "file",
-		"testOutput": "./tests/outputs/day01b.txt"
+		"testOutputType": "simple",
+		"testOutput": "5041680",
+		"testLevel": 0
 	}
   ]
 }
